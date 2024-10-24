@@ -152,18 +152,18 @@ body {
   cursor: pointer;
 }
 
-.sign-up-title {
+/* .sign-up-title {
   width: 233px;
   height: 232px;
   margin: auto;
   display: flex;
-  background-image: url(C:\Users\smhrd\Desktop\spring-oauth-mail\front\src\assets\images\logo.png);
-}
+  background-image: url(assets/images/logo.png);
+} */
 
 .sign-in-title {
   width: 233px;
   height: 232px;
   margin: auto;
   display: flex;
-  background-image: url(C:\Users\smhrd\Desktop\spring-oauth-mail\front\src\assets\images\logo.png);
+  background-image: url(assets/images/logo.png);
 }
