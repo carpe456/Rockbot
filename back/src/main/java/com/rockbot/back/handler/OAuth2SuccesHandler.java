@@ -1,6 +1,7 @@
 package com.rockbot.back.handler;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -29,6 +30,7 @@ public class OAuth2SuccesHandler extends SimpleUrlAuthenticationSuccessHandler {
         String userId = oAuth2User.getName();
         String token = jwtProvider.create(userId);
 
-        response.sendRedirect("http://localhost:3000/auth/oauth-response/" + token + "/3600");
+        String encodedToken = URLEncoder.encode(token, "UTF-8");
+        response.sendRedirect("http://localhost:3000/auth/chat?userId=" + userId + "&expirationTime=3600");
     }
 }

@@ -36,18 +36,23 @@ html {
   color: #000000;
 }
 
-/* 사이드바 */
+/* 사이드바 스타일 수정 */
 .sidebar-container {
   width: 360px;
   padding: 16px;
   background-color: #f8f9fa;
-  /* 기본 라이트 모드 배경 */
   display: flex;
   flex-direction: column;
   height: 100vh;
-  /* 사이드바가 전체 화면 높이를 차지하도록 설정 */
   box-sizing: border-box;
-  /* padding 포함한 전체 높이 계산 */
+  justify-content: space-between; /* 자식 요소들을 상단과 하단에 배치하도록 설정 */
+}
+
+/* 새로운 하단 버튼 컨테이너 스타일 추가 */
+.sidebar-bottom-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* 버튼들 사이의 간격 */
 }
 
 .bg-dark-mode .sidebar-container {
@@ -57,7 +62,6 @@ html {
 
 .profile-container {
   text-align: center;
-  margin-bottom: 16px;
 }
 
 .profile-user-id {
@@ -179,6 +183,11 @@ html {
   /* 다크 모드 텍스트 색상 */
 }
 
+.bg-dark-mode .user-bubble {
+  background-color: hsl(211, 100%, 35%);
+  /* 다크 모드 사용자 메세지 */
+}
+
 /* 입력창 */
 .chat-input-container {
   padding: 16px;
@@ -195,7 +204,7 @@ html {
 }
 
 .bg-dark-mode .chat-input-container {
-  background-color: #2d3748;
+  background-color: #2a3344;
   /* 다크 모드 배경 */
   border-top: 1px solid #4a5568;
   /* 다크 모드 경계선 */
@@ -236,6 +245,17 @@ html {
 }
 
 /* 버튼 스타일 */
+.sidebar-container .button {
+  width: 100%;
+  padding: 14px 10px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 15px;
+  font-family: 'Pretendard-Medium';
+}
+
 .button {
   padding: 14px 10px;
   border-radius: 8px;
@@ -250,7 +270,10 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 100px;
+}
+
+.sidebar-bt {
+
 }
 
 .mode-toggle-button,
@@ -258,7 +281,6 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 14px;
 }
 
 .dark-mode-toggle-button {
@@ -283,7 +305,7 @@ html {
 }
 
 .bg-dark-mode .send-button {
-  background-color: #2b6cb0;
+  background-color: hsl(211, 100%, 35%);
   /* 다크 모드 전송 버튼 배경 */
 }
 

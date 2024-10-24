@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams,useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './ChatBot.css';
 import { MessageSquare, Moon, Sun, Send, User, Briefcase, Coffee } from 'lucide-react';
@@ -21,21 +21,39 @@ const ChatBot: React.FC = () => {
   const [profileInfo, setProfileInfo] = useState<ProfileInfo>({
     userId: ''
   });
+  const { userId } = useParams<{ userId: string }>();
+  const loc = useLocation();
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
 
   const navigate = useNavigate(); // useNavigate 훅 추가
 
   // 로그인 정보 출력
   useEffect(() => {
+    
+    const searchParams = new URLSearchParams(loc.search);
+    const userIdFromURL = searchParams.get('userId');
+    
     const storedUserInfo = localStorage.getItem('userInfo');
-    if (storedUserInfo) {
+    if (userIdFromURL) {
+      // 쿼리스트링에 userId가 있을 경우, 해당 값으로 설정
+      setProfileInfo({ userId: userIdFromURL });
+    } else if (storedUserInfo) {
       setProfileInfo(JSON.parse(storedUserInfo));
-    } else {
+    } else  {
       setProfileInfo({ userId: 'Guest' }); // 기본값 설정
     }
-  }, []);
+  }, [loc]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuestion(e.target.value);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSend(); // 엔터 키가 눌리면 handleSend 함수 실행
+    }
   };
 
   const handleSend = async () => {
@@ -66,7 +84,25 @@ const ChatBot: React.FC = () => {
       setIsLoading(false);
     }
     setQuestion('');
+
+    // 메시지 전송 후 입력 필드에 포커스를 유지
+    if (inputRef.current && !isLoading) {
+      inputRef.current.focus();
+    }
   };
+
+  useEffect(() => {
+    if (inputRef.current && !isLoading) {
+      inputRef.current.focus(); // question 상태가 변경되면 입력 필드에 포커스를 설정합니다.
+    }
+  }, [question]);
+
+  // 새로운 메시지 추가될 때마다 스크롤을 맨 아래로 내림
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatHistory]);
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
 
@@ -76,24 +112,30 @@ const ChatBot: React.FC = () => {
 
   return (
     <div className={`flex h-screen ${darkMode ? 'bg-dark-mode text-light' : 'bg-light-mode text-dark'}`}>
-      {/* 사이드바 */}
-      <div className="sidebar-container">
-        <div className="profile-container mb-4">
-        {profileInfo.userId && (
-            <p className="profile-user-id">{profileInfo.userId}</p> // 사용자 ID 표시
-          )}
+       {/* 사이드바 */}
+       <div className="sidebar-container">
+        {/* 상단에 위치할 요소들 */}
+        <div>
+          <div className="profile-container mb-4">
+            {profileInfo.userId && (
+              <p className="profile-user-id">{profileInfo.userId}</p> // 사용자 ID 표시
+            )}
+          </div>
+          <button onClick={toggleProfileSettings} className="button profile-settings-button">
+            <User size={16} className="icon-spacing" /> 비밀번호 변경
+          </button>
         </div>
-        <button onClick={toggleProfileSettings} className="button profile-settings-button">
-          <User size={16} className="icon-spacing" /> 비밀번호 변경
-        </button>
-        
-        <button onClick={toggleDarkMode} className="button dark-mode-toggle-button">
-          {darkMode ? <Sun size={16} className="icon-spacing" /> : <Moon size={16} className="icon-spacing" />}
-          {darkMode ? '라이트 모드' : '다크 모드'}
-        </button>
-        <button onClick={() => navigate('/auth/sign-in')} className="button navigate-button">
-          <MessageSquare size={16} className="icon-spacing" /> 로그아웃
-        </button>
+
+        {/* 하단에 위치시킬 버튼들 */}
+        <div className="sidebar-bottom-buttons">
+          <button onClick={toggleDarkMode} className="button dark-mode-toggle-button">
+            {darkMode ? <Sun size={16} className="icon-spacing" /> : <Moon size={16} className="icon-spacing" />}
+            {darkMode ? '라이트 모드' : '다크 모드'}
+          </button>
+          <button onClick={() => navigate('/auth/sign-in')} className="button navigate-button">
+            <MessageSquare size={16} className="icon-spacing" /> 로그아웃
+          </button>
+        </div>
       </div>
 
       {/* 대화창 */}
@@ -114,7 +156,7 @@ const ChatBot: React.FC = () => {
           </div>
         )}
 
-        <div className="chat-messages-container">
+<div className="chat-messages-container" ref={chatContainerRef}>
           {chatHistory.map((chat, index) => (
             <div
               key={index}
@@ -132,6 +174,8 @@ const ChatBot: React.FC = () => {
               type="text"
               value={question}
               onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              ref={inputRef}
               className="input-field chat-input"
               placeholder="질문을 입력하세요..."
               disabled={isLoading}
