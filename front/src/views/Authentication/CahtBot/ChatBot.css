@@ -122,7 +122,9 @@ html {
 .chat-window-container {
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
+  width: 1000px; /*추가부분*/
+  margin: auto; /*추가부분*/
+  /* flex-grow: 1; */
   /* 화면의 남은 공간을 채우도록 설정 */
   height: 100vh;
   /* 채팅창도 전체 화면 높이를 차지하도록 설정 */
@@ -135,8 +137,7 @@ html {
   padding: 16px;
   overflow-y: auto;
   /* 메시지가 많아지면 스크롤이 생기도록 설정 */
-  background-color: #f1f3f5;
-  /* 기본 라이트 모드 배경 */
+  background-color: hsl(0, 0%, 100%);
 }
 
 .bg-dark-mode .chat-window-container {
@@ -145,7 +146,8 @@ html {
 }
 
 .bg-dark-mode .chat-messages-container {
-  background-color: #2d3748;
+  /* background-color: #2d3748; */
+  background-color: #1a202c;
   /* 다크 모드 배경 */
 }
 
@@ -208,7 +210,8 @@ html {
 }
 
 .bg-dark-mode .chat-input-container {
-  background-color: #2a3344;
+  /* background-color: #2a3344; */
+  background-color: #1a202c;
   /* 다크 모드 배경 */
   border-top: 1px solid #4a5568;
   /* 다크 모드 경계선 */

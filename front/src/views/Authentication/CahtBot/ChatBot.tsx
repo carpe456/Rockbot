@@ -121,9 +121,9 @@ const ChatBot: React.FC = () => {
               <p className="profile-user-id">{profileInfo.userId}</p> // 사용자 ID 표시
             )}
           </div>
-          <button onClick={toggleProfileSettings} className="button profile-settings-button">
+          {/* <button onClick={toggleProfileSettings} className="button profile-settings-button">
             <UserRound size={15} className="icon-spacing" /> 비밀번호 변경
-          </button>
+          </button> */}
         </div>
 
         {/* 하단에 위치시킬 버튼들 */}
@@ -142,7 +142,7 @@ const ChatBot: React.FC = () => {
       <div className="chat-window-container">
         {showProfileSettings && (
           <div className="profile-settings-container">
-            <h3 className="profile-settings-header">비밀번호 변경</h3>
+            {/* <h3 className="profile-settings-header">비밀번호 변경</h3>
             <input
               type="password"
               value={profileInfo.password || ''}
@@ -152,7 +152,7 @@ const ChatBot: React.FC = () => {
             />
             <button onClick={toggleProfileSettings} className="button profile-settings-save-button">
               저장
-            </button>
+            </button> */}
           </div>
         )}
 
