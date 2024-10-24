@@ -38,7 +38,7 @@ html {
 
 /* 사이드바 */
 .sidebar-container {
-  width: 250px;
+  width: 360px;
   padding: 16px;
   background-color: #f8f9fa;
   /* 기본 라이트 모드 배경 */
@@ -51,14 +51,18 @@ html {
 }
 
 .bg-dark-mode .sidebar-container {
-  background-color: #2d3748;
+  background-color: hwb(219 14% 75%);
   /* 다크 모드일 때 어두운 배경 */
 }
-
 
 .profile-container {
   text-align: center;
   margin-bottom: 16px;
+}
+
+.profile-user-id {
+  font-family: 'Pretendard-SemiBold';
+  font-size: 28px;
 }
 
 .profile-name {
@@ -118,19 +122,6 @@ html {
   /* padding 포함한 전체 높이 계산 */
 }
 
-.chat-header-container {
-  padding: 16px;
-  border-bottom: 1px solid #e9ecef;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.chat-header-title {
-  font-size: 1.25rem;
-  font-weight: bold;
-}
-
 .chat-messages-container {
   flex-grow: 1;
   padding: 16px;
@@ -160,6 +151,7 @@ html {
   border-radius: 8px;
   max-width: 70%;
   word-wrap: break-word;
+  font-size: 17px;
 }
 
 .user-message {
@@ -196,6 +188,10 @@ html {
   /* 기본 라이트 모드 배경 */
   box-sizing: border-box;
   /* padding 포함한 전체 높이 계산 */
+}
+
+.input-field {
+  font-family: 'Pretendard-Regular';
 }
 
 .bg-dark-mode .chat-input-container {
@@ -241,20 +237,28 @@ html {
 
 /* 버튼 스타일 */
 .button {
-  padding: 8px 12px;
+  padding: 14px 10px;
   border-radius: 8px;
   border: none;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  font-size: 15px;
+  font-family: 'Pretendard-Medium';
 }
 
-.profile-settings-button,
+.profile-settings-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 100px;
+}
+
 .mode-toggle-button,
 .dark-mode-toggle-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .dark-mode-toggle-button {

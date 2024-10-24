@@ -1,5 +1,5 @@
 import InputBox from 'components/InputBox';
-import React, { useState, useRef, ChangeEvent, KeyboardEvent } from 'react';
+import React, { useState, useRef, ChangeEvent, KeyboardEvent, useEffect } from 'react';
 import './style.css';
 import { useNavigate } from 'react-router-dom';
 import { SignInRequestDto } from 'apis/request/auth';
@@ -20,6 +20,7 @@ export default function SignIn() {
     const [password, setPassword] = useState<string>('');
 
     const [message, setMessage] = useState<string>('');
+    const [loggedInUserId, setLoggedInUserId] = useState<string | null>(null);
 
     const navigate = useNavigate();
 
@@ -34,15 +35,30 @@ export default function SignIn() {
         if (code === ResponseCode.DATABASE_ERROR) alert('데이터베이스 오류입니다.')
         if (code !== ResponseCode.SUCCESS) return;
         
-        
-        const { token, expirationTime } = ResponseBody as SignInResponseDto;
+        const { token, expirationTime, userId } = ResponseBody as SignInResponseDto;
 
         const now = (new Date().getTime())*1000;
         const expires = new Date(now + expirationTime);
         
-        setCookie('accessToken', token, { expires, path: '/'});
-        navigate('/auth/chat');
+        setCookie('accessToken', token, { expires, path: '/' });
+        
+        localStorage.setItem('userInfo', JSON.stringify({ userId, token }));
+        setLoggedInUserId(userId);
+
+        // 로그인한 사용자 ID 상태 업데이트
+        setLoggedInUserId(userId);
+
+        navigate('/auth/chat', { state: { userId } });
     };
+
+    useEffect(() => {
+        const storedUserInfo = localStorage.getItem('userInfo');
+        console.log('Stored userInfo from localStorage:', storedUserInfo); // 저장된 사용자 정보 확인
+        if (storedUserInfo) {
+            const parsedUserInfo = JSON.parse(storedUserInfo);
+            setLoggedInUserId(parsedUserInfo.userId);
+        }
+    }, []); 
 
     const onIdChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
         const { value } = event.target;
@@ -90,7 +106,7 @@ export default function SignIn() {
             <div className='sign-in-image'></div>
             <div className='sign-in-container'>
                 <div className='sign-in-box'>
-                    <div className='sign-in-title'>ROCKBOT</div>
+                    <div className='sign-in-title'></div>
                     <div className='sign-in-content-box'>
                     <div className='sign-in-content-input-box'>
                         <InputBox ref={idRef} title='아이디' placeholder='아이디를 입력해주세요' type='text' value={id} onChange={onIdChangeHandler} onKeyDown={onIdKeyDownHandler}></InputBox>

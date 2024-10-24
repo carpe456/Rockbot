@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './ChatBot.css';
 import { MessageSquare, Moon, Sun, Send, User, Briefcase, Coffee } from 'lucide-react';
 
 interface ProfileInfo {
-  name: string;
-  department: string;
-  position: string;
   password?: string;
+  userId?: string;
 }
 
 const ChatBot: React.FC = () => {
@@ -21,18 +19,18 @@ const ChatBot: React.FC = () => {
   const [currentMode, setCurrentMode] = useState<string>('업무');
   const [showProfileSettings, setShowProfileSettings] = useState<boolean>(false);
   const [profileInfo, setProfileInfo] = useState<ProfileInfo>({
-    name: '',
-    department: '',
-    position: '',
+    userId: ''
   });
 
   const navigate = useNavigate(); // useNavigate 훅 추가
 
+  // 로그인 정보 출력
   useEffect(() => {
-    // localStorage에서 사용자 정보 불러오기
     const storedUserInfo = localStorage.getItem('userInfo');
     if (storedUserInfo) {
       setProfileInfo(JSON.parse(storedUserInfo));
+    } else {
+      setProfileInfo({ userId: 'Guest' }); // 기본값 설정
     }
   }, []);
 
@@ -72,12 +70,6 @@ const ChatBot: React.FC = () => {
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
 
-  const handleModeChange = () => {
-    const newMode = currentMode === '휴가' ? '업무' : '휴가';
-    setCurrentMode(newMode);
-    setChatHistory([{ sender: 'bot', message: `${newMode} 모드로 전환되었습니다. 무엇을 도와드릴까요?` }]);
-  };
-
   const toggleProfileSettings = () => {
     setShowProfileSettings(!showProfileSettings);
   };
@@ -87,36 +79,25 @@ const ChatBot: React.FC = () => {
       {/* 사이드바 */}
       <div className="sidebar-container">
         <div className="profile-container mb-4">
-          <h2 className="profile-name">{profileInfo.name}</h2>
-          <p className="profile-department">
-            {profileInfo.department} - {profileInfo.position}
-          </p>
+        {profileInfo.userId && (
+            <p className="profile-user-id">{profileInfo.userId}</p> // 사용자 ID 표시
+          )}
         </div>
         <button onClick={toggleProfileSettings} className="button profile-settings-button">
           <User size={16} className="icon-spacing" /> 비밀번호 변경
         </button>
-        <button onClick={handleModeChange} className="button mode-toggle-button">
-          {currentMode === '업무' ? (
-            <Coffee size={16} className="icon-spacing" />
-          ) : (
-            <Briefcase size={16} className="icon-spacing" />
-          )}
-          {currentMode === '업무' ? '휴가 모드로 전환' : '업무 모드로 전환'}
-        </button>
+        
         <button onClick={toggleDarkMode} className="button dark-mode-toggle-button">
           {darkMode ? <Sun size={16} className="icon-spacing" /> : <Moon size={16} className="icon-spacing" />}
           {darkMode ? '라이트 모드' : '다크 모드'}
         </button>
-        <button onClick={() => navigate('/signin')} className="button navigate-button">
-          <MessageSquare size={16} className="icon-spacing" /> 로그인 페이지로 이동
+        <button onClick={() => navigate('/auth/sign-in')} className="button navigate-button">
+          <MessageSquare size={16} className="icon-spacing" /> 로그아웃
         </button>
       </div>
 
       {/* 대화창 */}
       <div className="chat-window-container">
-        <div className="chat-header-container">
-          <h2 className="chat-header-title">{currentMode} 모드</h2>
-        </div>
         {showProfileSettings && (
           <div className="profile-settings-container">
             <h3 className="profile-settings-header">비밀번호 변경</h3>

@@ -260,7 +260,6 @@ export default function SignUp() {
             <div className='sign-up-image'></div>
             <div className='sign-up-container'>
                 <div className='sign-up-box'>
-                    <div className='sign-up-title'>ROCKBOT</div>
                     <div className='sign-up-content-box'>
                         <div className='sign-up-content-sns-sign-up-box'>
                             <div className='sign-up-content-sns-sign-up-title'>{'SNS 회원가입'}</div>

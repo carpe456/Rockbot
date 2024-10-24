@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Entity(name = "user")
 @Table(name = "user")
 public class UserEntity {
-    
+
     @Id
     @Column(name = "user_id")
     private String userId;
@@ -42,4 +42,7 @@ public class UserEntity {
         this.role = "ROLE_USER";
     }
 
+    public String getUserId() {
+        return userId;
+    }
 }
