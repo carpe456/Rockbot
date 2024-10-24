@@ -52,7 +52,7 @@ html {
 .sidebar-bottom-buttons {
   display: flex;
   flex-direction: column;
-  gap: 8px; /* 버튼들 사이의 간격 */
+  gap: 14px; /* 버튼들 사이의 간격 */
 }
 
 .bg-dark-mode .sidebar-container {
@@ -115,7 +115,7 @@ html {
 }
 
 .icon-spacing {
-  margin-right: 3px;
+  margin-right: 5px;
 }
 
 /* 대화창 */
@@ -286,16 +286,24 @@ html {
   justify-content: center;
 }
 
-.dark-mode-toggle-button {
+.dark-mode-toggle-button:hover,
+.navigate-button:hover {
   background-color: #e2e8f0;
   /* 기본 라이트 모드 배경 */
 }
 
-.bg-dark-mode .dark-mode-toggle-button {
+.bg-dark-mode .dark-mode-toggle-button,
+.bg-dark-mode .navigate-button {
   background-color: #4a5568;
   /* 다크 모드 배경 */
   color: #e2e8f0;
   /* 다크 모드 텍스트 색상 */
+}
+
+.bg-dark-mode .dark-mode-toggle-button:hover,
+.bg-dark-mode .navigate-button:hover {
+  background-color: hwb(219 22% 66%);
+  /* 기본 라이트 모드 배경 */
 }
 
 .send-button {
@@ -340,7 +348,7 @@ html {
   margin-bottom: 16px;
 }
 
-.profile-settings-save-button {
+/* .profile-settings-save-button {
   width: 100%;
   padding: 12px;
   background-color: #007bff;
@@ -353,4 +361,4 @@ html {
 
 .profile-settings-save-button:hover {
   background-color: #0056b3;
-}
+} */
