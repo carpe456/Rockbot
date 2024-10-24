@@ -114,6 +114,10 @@ html {
   color: #adb5bd;
 }
 
+.icon-spacing {
+  margin-right: 3px;
+}
+
 /* 대화창 */
 .chat-window-container {
   display: flex;
