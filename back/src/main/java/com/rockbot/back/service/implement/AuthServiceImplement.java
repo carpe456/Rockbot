@@ -153,6 +153,7 @@ public class AuthServiceImplement implements AuthService {
     public ResponseEntity<? super SignInResponseDto> signIn(SignInRequestDto dto) {
         String token = null;
         String userId = null;
+        String name = null;
 
         try {
             userId = dto.getId();
@@ -163,17 +164,20 @@ public class AuthServiceImplement implements AuthService {
             String password = dto.getPassword();
             String encodedPassword = userEntity.getPassword();
             boolean isMatched = passwordEncoder.matches(password, encodedPassword);
-            if (!isMatched)
+            if (!isMatched) {
                 return SignInResponseDto.signInFail();
+            }
 
-            token = jwtProvider.create(userId);
+            // userEntity에서 name을 가져옵니다.
+            name = userEntity.getName();
 
-            userId = userEntity.getUserId();
+            // 토큰 생성 시 userId와 name을 포함
+            token = jwtProvider.create(userId, name);
 
         } catch (Exception exception) {
             exception.printStackTrace();
             return ResponseDto.databaseError();
         }
-        return SignInResponseDto.success(token, userId);
+        return SignInResponseDto.success(token, userId, name);
     }
 }

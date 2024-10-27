@@ -13,16 +13,18 @@ public class SignInResponseDto extends ResponseDto {
     private String token;
     private int expirationTime;
 
-    private String UserId; // 사용자 이름
+    private String UserId; // 사용자 아이디
+    private String name; // 사용자 이름
 
-    private SignInResponseDto(String token, String UserId) {
+    private SignInResponseDto(String token, String UserId, String name) {
         this.token = token;
         this.expirationTime = 3600;
         this.UserId = UserId;
+        this.name = name;
     }
 
-    public static ResponseEntity<SignInResponseDto> success(String token, String userId) {
-        SignInResponseDto responseBody = new SignInResponseDto(token, userId);
+    public static ResponseEntity<SignInResponseDto> success(String token, String userId, String name) {
+        SignInResponseDto responseBody = new SignInResponseDto(token, userId, name);
         return ResponseEntity.status(HttpStatus.OK).body(responseBody);
     }
 

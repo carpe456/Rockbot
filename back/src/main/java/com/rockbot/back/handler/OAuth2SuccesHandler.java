@@ -28,7 +28,8 @@ public class OAuth2SuccesHandler extends SimpleUrlAuthenticationSuccessHandler {
             Authentication authentication) throws IOException, ServletException {
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         String userId = oAuth2User.getName();
-        String token = jwtProvider.create(userId);
+        String name = oAuth2User.getName();
+        String token = jwtProvider.create(userId, name);
 
         String encodedToken = URLEncoder.encode(token, "UTF-8");
         response.sendRedirect("http://localhost:3000/auth/chat?userId=" + userId + "&expirationTime=3600");

@@ -11,15 +11,17 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class SignUpRequestDto {
-    
+
     @NotBlank(message = "User ID cannot be blank.")
     private String id;
 
     @NotBlank(message = "Password cannot be blank.")
-    @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9]{8,13}$", 
-             message = "Password must be 8-13 characters long and contain both letters and numbers.")
+    @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9]{8,13}$", message = "Password must be 8-13 characters long and contain both letters and numbers.")
     private String password;
-    
+
+    @NotBlank(message = "Name cannot be blank.")
+    private String name;
+
     @Email(message = "Email should be valid.")
     @NotBlank(message = "Email cannot be blank.")
     private String email;

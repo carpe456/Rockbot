@@ -3,7 +3,6 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './ChatBot.css';
 import { Unlock, Moon, Sun, Send, UserRound } from 'lucide-react';
-import { jwtDecode } from 'jwt-decode';
 
 interface ProfileInfo {
   password?: string;
@@ -27,41 +26,25 @@ const ChatBot: React.FC = () => {
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-
   const navigate = useNavigate();
 
   // 로그인 정보 출력
   useEffect(() => {
-    const searchParams = new URLSearchParams(loc.search);
-    const nameFromURL = searchParams.get('name');
-  
+    // state로 전달된 name 값 가져오기
+    const nameFromState = loc.state?.name;
+
     const storedUserInfo = localStorage.getItem('userInfo');
-  
-    // 쿠키에서 JWT 토큰 가져오기
-    const cookieString = document.cookie;
-    const cookies = cookieString.split('; ').reduce((acc: { [key: string]: string }, current: string) => {
-      const [key, value] = current.split('=');
-      acc[key] = value;
-      return acc;
-    }, {});
-    const token = cookies['authToken'];
-  
-    if (nameFromURL) {
-      setProfileInfo({ name: nameFromURL });
+    if (nameFromState) {
+      setProfileInfo({ name: nameFromState });
+      console.log('name from state: ', nameFromState);
     } else if (storedUserInfo) {
       setProfileInfo(JSON.parse(storedUserInfo));
-    } else if (token) {
-      try {
-        const decodedToken: any = jwtDecode(token);
-        setProfileInfo({ name: decodedToken.name });
-      } catch (error) {
-        console.error('Failed to decode JWT:', error);
-        setProfileInfo({ name: 'Guest' });
-      }
+      console.log('name from localStorage: ', storedUserInfo);
     } else {
-      setProfileInfo({ name: 'Guest' });
+      setProfileInfo({ name: 'Guest' }); // 기본값 설정
+      console.log('default name: Guest');
     }
-  }, [loc]);  
+  }, [loc]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuestion(e.target.value);

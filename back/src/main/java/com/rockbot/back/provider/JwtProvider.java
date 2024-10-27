@@ -16,25 +16,25 @@ import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtProvider {
-    
+
     @Value("${secret-key}")
     private String secretKey;
 
-    public String create(String userId) {
+    public String create(String userId, String name) {
 
         Date expiredDate = Date.from(Instant.now().plus(1, ChronoUnit.HOURS));
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharset.UTF_8));
 
         String jwt = Jwts.builder()
-            .signWith(key, SignatureAlgorithm.HS256)
-            .setSubject(userId).setIssuedAt(new Date()).setExpiration(expiredDate)
-            .compact();
+                .signWith(key, SignatureAlgorithm.HS256)
+                .setSubject(userId).claim("name", name).setIssuedAt(new Date()).setExpiration(expiredDate)
+                .compact();
 
         return jwt;
 
     }
 
-    public String validate (String jwt) {
+    public String validate(String jwt) {
 
         String subject = null;
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharset.UTF_8));
@@ -42,11 +42,11 @@ public class JwtProvider {
         try {
 
             subject = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(jwt)
-                .getBody()
-                .getSubject();
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(jwt)
+                    .getBody()
+                    .getSubject();
 
         } catch (Exception exception) {
             exception.printStackTrace();

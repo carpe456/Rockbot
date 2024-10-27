@@ -20,41 +20,39 @@ export default function SignIn() {
     const [password, setPassword] = useState<string>('');
 
     const [message, setMessage] = useState<string>('');
-    const [loggedInName, setLoggedInName] = useState<string | null>(null);
+    const [loggedName, setLoggedName] = useState<string | null>(null);
 
     const navigate = useNavigate();
 
     const signInButtonClass = id && password ? 'primary-button-lg' : 'disable-button-lg';
 
-    const signInResponse = (responseBody: ResponseBody<SignInResponseDto>) => {
-        if (!responseBody) return;
+    const signInResponse = (ResponseBody: ResponseBody<SignInResponseDto>) => {
+        if (!ResponseBody) return;
     
-        const { code } = responseBody;
+        const { code } = ResponseBody;
         if (code === ResponseCode.VALIDATION_FAIL) {
             alert('아이디와 비밀번호를 입력하세요.');
-            return;
         }
         if (code === ResponseCode.SIGN_IN_FAIL) {
             setMessage('로그인 정보가 일치하지 않습니다.');
-            return;
         }
         if (code === ResponseCode.DATABASE_ERROR) {
             alert('데이터베이스 오류입니다.');
-            return;
         }
         if (code !== ResponseCode.SUCCESS) {
             return;
         }
     
-        const { token, expirationTime, userId, name } = responseBody as SignInResponseDto;
+        const { token, expirationTime, userId, name } = ResponseBody as SignInResponseDto;
     
-        const expires = new Date(new Date().getTime() + expirationTime * 1000);
+        const now = (new Date().getTime())*1000;
+        const expires = new Date(now + expirationTime);
         
-        // JWT 토큰 쿠키에 저장
         setCookie('accessToken', token, { expires, path: '/' });
     
-        // 사용자 정보 로컬 스토리지에 저장
         localStorage.setItem('userInfo', JSON.stringify({ userId, token, name }));
+
+        setLoggedName(name);
         
         // 로그인 후 채팅창으로 이동
         navigate('/auth/chat', { state: { name } });
@@ -64,7 +62,7 @@ export default function SignIn() {
         const storedUserInfo = localStorage.getItem('userInfo');
         if (storedUserInfo) {
             const parsedUserInfo = JSON.parse(storedUserInfo);
-            setLoggedInName(parsedUserInfo.name);
+            setLoggedName(parsedUserInfo.name);
         }
     }, []);
 

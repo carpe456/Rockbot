@@ -22,6 +22,7 @@ public class UserEntity {
     private String userId;
 
     private String password;
+    private String name;
     private String email;
     private String type;
     private String role;
@@ -29,20 +30,36 @@ public class UserEntity {
     public UserEntity(SignUpRequestDto dto) {
         this.userId = dto.getId();
         this.password = dto.getPassword();
+        this.name = dto.getName();
         this.email = dto.getEmail();
         this.type = "app";
         this.role = "ROLE_USER";
     }
 
-    public UserEntity(String userId, String email, String type) {
+    public UserEntity(String userId, String email, String name, String type) {
         this.userId = userId;
         this.password = "passw0rd";
+        this.name = name;
         this.email = email;
         this.type = type;
         this.role = "ROLE_USER";
     }
 
+    // OAuth2UserServiceImplement에서 사용하는 새로운 생성자
+    public UserEntity(String userId, String email, String type) {
+        this.userId = userId;
+        this.password = "passw0rd"; // 기본 비밀번호 설정
+        this.name = "default_name"; // 기본 이름 설정
+        this.email = email;
+        this.type = type;
+        this.role = "ROLE_USER"; // 기본 역할 설정
+    }
+
     public String getUserId() {
         return userId;
+    }
+
+    public String getName() {
+        return name;
     }
 }
