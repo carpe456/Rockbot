@@ -20,45 +20,53 @@ export default function SignIn() {
     const [password, setPassword] = useState<string>('');
 
     const [message, setMessage] = useState<string>('');
-    const [loggedInUserId, setLoggedInUserId] = useState<string | null>(null);
+    const [loggedInName, setLoggedInName] = useState<string | null>(null);
 
     const navigate = useNavigate();
 
     const signInButtonClass = id && password ? 'primary-button-lg' : 'disable-button-lg';
 
-    const signInResponse = (ResponseBody: ResponseBody<SignInResponseDto>) => {
-        if (!ResponseBody) return;
-
-        const { code } = ResponseBody;
-        if (code === ResponseCode.VALIDATION_FAIL) alert('아이디와 비밀번호를 입력하세요.');
-        if (code === ResponseCode.SIGN_IN_FAIL) setMessage('로그인 정보가 일치하지 않습니다.')
-        if (code === ResponseCode.DATABASE_ERROR) alert('데이터베이스 오류입니다.')
-        if (code !== ResponseCode.SUCCESS) return;
+    const signInResponse = (responseBody: ResponseBody<SignInResponseDto>) => {
+        if (!responseBody) return;
+    
+        const { code } = responseBody;
+        if (code === ResponseCode.VALIDATION_FAIL) {
+            alert('아이디와 비밀번호를 입력하세요.');
+            return;
+        }
+        if (code === ResponseCode.SIGN_IN_FAIL) {
+            setMessage('로그인 정보가 일치하지 않습니다.');
+            return;
+        }
+        if (code === ResponseCode.DATABASE_ERROR) {
+            alert('데이터베이스 오류입니다.');
+            return;
+        }
+        if (code !== ResponseCode.SUCCESS) {
+            return;
+        }
+    
+        const { token, expirationTime, userId, name } = responseBody as SignInResponseDto;
+    
+        const expires = new Date(new Date().getTime() + expirationTime * 1000);
         
-        const { token, expirationTime, userId } = ResponseBody as SignInResponseDto;
-
-        const now = (new Date().getTime())*1000;
-        const expires = new Date(now + expirationTime);
-        
+        // JWT 토큰 쿠키에 저장
         setCookie('accessToken', token, { expires, path: '/' });
+    
+        // 사용자 정보 로컬 스토리지에 저장
+        localStorage.setItem('userInfo', JSON.stringify({ userId, token, name }));
         
-        localStorage.setItem('userInfo', JSON.stringify({ userId, token }));
-        setLoggedInUserId(userId);
-
-        // 로그인한 사용자 ID 상태 업데이트
-        setLoggedInUserId(userId);
-
-        navigate('/auth/chat', { state: { userId } });
-    };
+        // 로그인 후 채팅창으로 이동
+        navigate('/auth/chat', { state: { name } });
+    };    
 
     useEffect(() => {
         const storedUserInfo = localStorage.getItem('userInfo');
-        console.log('Stored userInfo from localStorage:', storedUserInfo); // 저장된 사용자 정보 확인
         if (storedUserInfo) {
             const parsedUserInfo = JSON.parse(storedUserInfo);
-            setLoggedInUserId(parsedUserInfo.userId);
+            setLoggedInName(parsedUserInfo.name);
         }
-    }, []); 
+    }, []);
 
     const onIdChangeHandler = (event: ChangeEvent<HTMLInputElement>) => {
         const { value } = event.target;

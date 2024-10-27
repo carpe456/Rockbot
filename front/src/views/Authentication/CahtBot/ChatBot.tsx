@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams,useLocation, useNavigate } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './ChatBot.css';
 import { Unlock, Moon, Sun, Send, UserRound } from 'lucide-react';
+import { jwtDecode } from 'jwt-decode';
 
 interface ProfileInfo {
   password?: string;
   userId?: string;
+  name?: string;
 }
 
 const ChatBot: React.FC = () => {
@@ -16,35 +18,50 @@ const ChatBot: React.FC = () => {
   ]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [darkMode, setDarkMode] = useState<boolean>(false);
-  const [currentMode, setCurrentMode] = useState<string>('업무');
   const [showProfileSettings, setShowProfileSettings] = useState<boolean>(false);
   const [profileInfo, setProfileInfo] = useState<ProfileInfo>({
-    userId: ''
+    name: ''
   });
-  const { userId } = useParams<{ userId: string }>();
+  const { name } = useParams<{ name: string }>();
   const loc = useLocation();
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
 
-  const navigate = useNavigate(); // useNavigate 훅 추가
+  const navigate = useNavigate();
 
   // 로그인 정보 출력
   useEffect(() => {
-    
     const searchParams = new URLSearchParams(loc.search);
-    const userIdFromURL = searchParams.get('userId');
-    
+    const nameFromURL = searchParams.get('name');
+  
     const storedUserInfo = localStorage.getItem('userInfo');
-    if (userIdFromURL) {
-      // 쿼리스트링에 userId가 있을 경우, 해당 값으로 설정
-      setProfileInfo({ userId: userIdFromURL });
+  
+    // 쿠키에서 JWT 토큰 가져오기
+    const cookieString = document.cookie;
+    const cookies = cookieString.split('; ').reduce((acc: { [key: string]: string }, current: string) => {
+      const [key, value] = current.split('=');
+      acc[key] = value;
+      return acc;
+    }, {});
+    const token = cookies['authToken'];
+  
+    if (nameFromURL) {
+      setProfileInfo({ name: nameFromURL });
     } else if (storedUserInfo) {
       setProfileInfo(JSON.parse(storedUserInfo));
-    } else  {
-      setProfileInfo({ userId: 'Guest' }); // 기본값 설정
+    } else if (token) {
+      try {
+        const decodedToken: any = jwtDecode(token);
+        setProfileInfo({ name: decodedToken.name });
+      } catch (error) {
+        console.error('Failed to decode JWT:', error);
+        setProfileInfo({ name: 'Guest' });
+      }
+    } else {
+      setProfileInfo({ name: 'Guest' });
     }
-  }, [loc]);
+  }, [loc]);  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuestion(e.target.value);
@@ -110,6 +127,11 @@ const ChatBot: React.FC = () => {
     setShowProfileSettings(!showProfileSettings);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('userInfo');
+    navigate('/auth/sign-in');
+  };
+
   return (
     <div className={`flex h-screen ${darkMode ? 'bg-dark-mode text-light' : 'bg-light-mode text-dark'}`}>
        {/* 사이드바 */}
@@ -117,8 +139,8 @@ const ChatBot: React.FC = () => {
         {/* 상단에 위치할 요소들 */}
         <div>
           <div className="profile-container mb-4">
-            {profileInfo.userId && (
-              <p className="profile-user-id">{profileInfo.userId}</p> // 사용자 ID 표시
+            {profileInfo.name && (
+              <p className="profile-user-id">{profileInfo.name}</p> // 사용자 ID 표시
             )}
           </div>
           {/* <button onClick={toggleProfileSettings} className="button profile-settings-button">
@@ -132,7 +154,7 @@ const ChatBot: React.FC = () => {
             {darkMode ? <Sun size={16} className="icon-spacing" /> : <Moon size={15} className="icon-spacing" />}
             {darkMode ? '라이트 모드' : '다크 모드'}
           </button>
-          <button onClick={() => navigate('/auth/sign-in')} className="button navigate-button">
+          <button onClick={handleLogout} className="button navigate-button">
             <Unlock size={15} className="icon-spacing" />로그아웃
           </button>
         </div>

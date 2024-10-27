@@ -2,7 +2,7 @@
     width: 100vw;
     height: 100vh;
     display: flex;
-    font-family: Pretendard;
+    font-family: 'Pretendard-Medium';
 }
 
 .sign-up-image {
@@ -18,8 +18,12 @@
     justify-content: center;
     align-items: center;
     background-color: #f7f7f7;
-    font-family: Pretendard;
+    font-family: 'Pretendard-Medium';
 }
+
+.input-box-input {
+    font-family: 'Pretendard-Regular';
+  }
 
 .sign-up-box {
     width: 380px;
