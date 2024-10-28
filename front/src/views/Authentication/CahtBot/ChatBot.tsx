@@ -3,6 +3,7 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './ChatBot.css';
 import { Unlock, Moon, Sun, Send, UserRound } from 'lucide-react';
+import { useCookies } from 'react-cookie';
 
 interface ProfileInfo {
   password?: string;
@@ -18,32 +19,35 @@ const ChatBot: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [darkMode, setDarkMode] = useState<boolean>(false);
   const [showProfileSettings, setShowProfileSettings] = useState<boolean>(false);
-  const [profileInfo, setProfileInfo] = useState<ProfileInfo>({
-    name: ''
-  });
-  const { name } = useParams<{ name: string }>();
-  const loc = useLocation();
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const [profileInfo, setProfileInfo] = useState({ name: 'Guest' });
+  const [cookies, setCookie, removeCookie] = useCookies(['name', 'accessToken']);
+  const loc = useLocation();
 
   const navigate = useNavigate();
 
   // 로그인 정보 출력
   useEffect(() => {
-    
-    const searchParams = new URLSearchParams(loc.search);
-    const nameFromURL = searchParams.get('name');
-    
+    // `localStorage`와 쿠키 모두를 확인하여 가장 최신 값을 가져옵니다.
     const storedUserInfo = localStorage.getItem('userInfo');
-    if (nameFromURL) {
-      // 쿼리스트링에 userId가 있을 경우, 해당 값으로 설정
-      setProfileInfo({ name: nameFromURL });
+    let userName = 'Guest';
+
+    if (cookies.name) {
+        userName = cookies.name;
+        // console.log("쿠키에서 가져온 이름:", cookies.name);
     } else if (storedUserInfo) {
-      setProfileInfo(JSON.parse(storedUserInfo));
-    } else  {
-      setProfileInfo({ userId: 'Guest' }); // 기본값 설정
+        const parsedInfo = JSON.parse(storedUserInfo);
+        userName = parsedInfo.name || 'Guest';
+        // console.log("로컬 스토리지에서 가져온 이름:", userName);
+    } else {
+        console.log("기본값 이름: Guest");
     }
-  }, [loc]);
+
+    // 최종 이름 설정
+    setProfileInfo({ name: userName });
+}, [cookies, loc]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuestion(e.target.value);
@@ -110,6 +114,8 @@ const ChatBot: React.FC = () => {
   };
 
   const handleLogout = () => {
+    removeCookie('name', { path: '/' });
+    removeCookie('accessToken', { path: '/' });
     localStorage.removeItem('userInfo');
     navigate('/auth/sign-in');
   };
