@@ -13,9 +13,6 @@ interface ProfileInfo {
 
 const ChatBot: React.FC = () => {
   const [question, setQuestion] = useState<string>('');
-  const [chatHistory, setChatHistory] = useState<Array<{ sender: string; message: string }>>([
-    { sender: 'bot', message: '무엇을 도와드릴까요?' },
-  ]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [darkMode, setDarkMode] = useState<boolean>(false);
   const [showProfileSettings, setShowProfileSettings] = useState<boolean>(false);
@@ -25,6 +22,8 @@ const ChatBot: React.FC = () => {
   const [profileInfo, setProfileInfo] = useState({ name: 'Guest' });
   const [cookies, setCookie, removeCookie] = useCookies(['name', 'accessToken']);
   const loc = useLocation();
+
+  const [chatHistory, setChatHistory] = useState<Array<{ sender: string; message: string }>>([]);
 
   const navigate = useNavigate();
 
@@ -40,7 +39,7 @@ const ChatBot: React.FC = () => {
     } else if (storedUserInfo) {
         const parsedInfo = JSON.parse(storedUserInfo);
         userName = parsedInfo.name || 'Guest';
-        // console.log("로컬 스토리지에서 가져온 이름:", userName);
+        //console.log("로컬 스토리지에서 가져온 이름:", userName);
     } else {
         console.log("기본값 이름: Guest");
     }
@@ -48,6 +47,11 @@ const ChatBot: React.FC = () => {
     // 최종 이름 설정
     setProfileInfo({ name: userName });
 }, [cookies, loc]);
+
+useEffect(() => {
+  // profileInfo가 로드된 후 초기 메시지 설정
+  setChatHistory([{ sender: 'bot', message: `${profileInfo.name}님 무엇을 도와드릴까요?` }]);
+}, [profileInfo]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuestion(e.target.value);
