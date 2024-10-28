@@ -30,19 +30,18 @@ const ChatBot: React.FC = () => {
 
   // 로그인 정보 출력
   useEffect(() => {
-    // state로 전달된 name 값 가져오기
-    const nameFromState = loc.state?.name;
-
+    
+    const searchParams = new URLSearchParams(loc.search);
+    const nameFromURL = searchParams.get('name');
+    
     const storedUserInfo = localStorage.getItem('userInfo');
-    if (nameFromState) {
-      setProfileInfo({ name: nameFromState });
-      console.log('name from state: ', nameFromState);
+    if (nameFromURL) {
+      // 쿼리스트링에 userId가 있을 경우, 해당 값으로 설정
+      setProfileInfo({ name: nameFromURL });
     } else if (storedUserInfo) {
       setProfileInfo(JSON.parse(storedUserInfo));
-      console.log('name from localStorage: ', storedUserInfo);
-    } else {
-      setProfileInfo({ name: 'Guest' }); // 기본값 설정
-      console.log('default name: Guest');
+    } else  {
+      setProfileInfo({ userId: 'Guest' }); // 기본값 설정
     }
   }, [loc]);
 
@@ -123,7 +122,7 @@ const ChatBot: React.FC = () => {
         <div>
           <div className="profile-container mb-4">
             {profileInfo.name && (
-              <p className="profile-user-id">{profileInfo.name}</p> // 사용자 ID 표시
+              <p className="profile-user-id">{profileInfo.name}<span className="small-text">님</span></p> // 사용자 ID 표시
             )}
           </div>
           {/* <button onClick={toggleProfileSettings} className="button profile-settings-button">

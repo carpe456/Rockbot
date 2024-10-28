@@ -17,7 +17,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.rockbot.back.filter.JwtAuthenticationFilter;
-import com.rockbot.back.handler.OAuth2SuccesHandler;
+import com.rockbot.back.handler.OAuth2SuccessHandler;
 
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.ServletException;
@@ -33,7 +33,7 @@ public class WebSecurityConfig {
 
         private final JwtAuthenticationFilter jwtAuthenticationFilter;
         private final DefaultOAuth2UserService oAuth2UserService;
-        private final OAuth2SuccesHandler oAuth2SuccesHandler;
+        private final OAuth2SuccessHandler oAuth2SuccesHandler;
 
         @Bean
         protected SecurityFilterChain configure(HttpSecurity httpSecurity) throws Exception {

@@ -65,8 +65,13 @@ html {
 }
 
 .profile-user-id {
-  font-family: 'Pretendard-SemiBold';
-  font-size: 28px;
+  font-family: 'Pretendard-Medium';
+  font-size: 24px;
+}
+
+.small-text {
+  font-family: 'Pretendard-Medium';
+  font-size: 18px;
 }
 
 .profile-name {

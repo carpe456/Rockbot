@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class OAuth2SuccesHandler extends SimpleUrlAuthenticationSuccessHandler {
+public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtProvider jwtProvider;
 
@@ -27,11 +27,15 @@ public class OAuth2SuccesHandler extends SimpleUrlAuthenticationSuccessHandler {
             HttpServletResponse response,
             Authentication authentication) throws IOException, ServletException {
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-        String userId = oAuth2User.getName();
+        String userId = oAuth2User.getUserId();
         String name = oAuth2User.getName();
         String token = jwtProvider.create(userId, name);
 
         String encodedToken = URLEncoder.encode(token, "UTF-8");
-        response.sendRedirect("http://localhost:3000/auth/chat?userId=" + userId + "&expirationTime=3600");
+        String encodedName = URLEncoder.encode(name, "UTF-8");
+        response.sendRedirect("http://localhost:3000/auth/chat?userId=" + userId +
+                "&name=" + encodedName +
+                "&token=" + encodedToken +
+                "&expirationTime=3600");
     }
 }

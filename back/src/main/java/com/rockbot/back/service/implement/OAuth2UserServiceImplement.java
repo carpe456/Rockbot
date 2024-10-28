@@ -38,9 +38,11 @@ public class OAuth2UserServiceImplement extends DefaultOAuth2UserService {
         UserEntity userEntity = null;
         String userId = null;
         String email = "email@email.com";
+        String name = "default_name"; // 기본값 설정
 
         if (oauthClientName.equals("kakao")) {
             userId = "kakao_" + oAuth2User.getAttributes().get("id");
+            name = (String) ((Map<String, Object>) oAuth2User.getAttributes().get("properties")).get("nickname");
             userEntity = new UserEntity(userId, email, "kakao");
         }
 
@@ -48,10 +50,11 @@ public class OAuth2UserServiceImplement extends DefaultOAuth2UserService {
             Map<String, String> responseMap = (Map<String, String>) oAuth2User.getAttributes().get("response");
             userId = "naver_" + responseMap.get("id").substring(0, 14);
             email = responseMap.get("email");
-            userEntity = new UserEntity(userId, email, "naver");
+            name = responseMap.get("name");
+            userEntity = new UserEntity(userId, email, name, "naver");
         }
         userRepository.save(userEntity);
 
-        return new CustomOAuth2User(userId);
+        return new CustomOAuth2User(userId, name);
     }
 }
