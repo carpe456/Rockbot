@@ -5,10 +5,12 @@ html {
   padding: 0;
   height: 100%;
   font-family: Pretendard-Regular;
+  transition: background-color 0.3s ease;
 }
 
 .flex {
   display: flex;
+  transition: background-color 0.3s ease;
 }
 
 .h-screen {
@@ -46,6 +48,7 @@ html {
   height: 100vh;
   box-sizing: border-box;
   justify-content: space-between; /* 자식 요소들을 상단과 하단에 배치하도록 설정 */
+  transition: background-color 0.3s ease;
 }
 
 /* 새로운 하단 버튼 컨테이너 스타일 추가 */
@@ -135,6 +138,7 @@ html {
   /* 채팅창도 전체 화면 높이를 차지하도록 설정 */
   box-sizing: border-box;
   /* padding 포함한 전체 높이 계산 */
+  transition: background-color 0.3s ease;
 }
 
 .chat-messages-container {
@@ -143,6 +147,7 @@ html {
   overflow-y: auto;
   /* 메시지가 많아지면 스크롤이 생기도록 설정 */
   background-color: hsl(0, 0%, 100%);
+  transition: background-color 0.3s ease;
 }
 
 .bg-dark-mode .chat-window-container {
@@ -158,6 +163,7 @@ html {
 
 .message-container {
   margin-bottom: 12px;
+  transition: background-color 0.3s ease;
 }
 
 .message-bubble {
@@ -167,24 +173,29 @@ html {
   max-width: 70%;
   word-wrap: break-word;
   font-size: 17px;
+  transition: background-color 0.3s ease;
 }
 
 .user-message {
   text-align: right;
+  transition: background-color 0.3s ease;
 }
 
 .user-bubble {
   background-color: #007bff;
   color: #fff;
+  transition: background-color 0.3s ease;
 }
 
 .bot-message {
   text-align: left;
+  transition: background-color 0.3s ease;
 }
 
 .bot-bubble {
   background-color: #e9ecef;
   color: #000;
+  transition: background-color 0.3s ease;
 }
 
 .bg-dark-mode .bot-bubble {
@@ -208,6 +219,7 @@ html {
   /* 기본 라이트 모드 배경 */
   box-sizing: border-box;
   /* padding 포함한 전체 높이 계산 */
+  transition: background-color 0.3s ease;
 }
 
 .input-field {
@@ -232,6 +244,7 @@ html {
   font-size: 1rem;
   border: 1px solid #ced4da;
   flex: 1;
+  transition: background-color 0.3s ease;
 }
 
 .input-field-password {
@@ -318,6 +331,7 @@ html {
   border: none;
   border-radius: 0 4px 4px 0;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 .bg-dark-mode .send-button {
