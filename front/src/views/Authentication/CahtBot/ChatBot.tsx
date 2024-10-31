@@ -71,38 +71,59 @@ const ChatBot: React.FC = () => {
     setIsLoading(true);
     const newMessage: ChatLog = { sender: 'user', message: question, date: new Date().toISOString() };
 
-    // 세션 메시지에 추가
+    // 세션 메시지와 화면에 즉시 반영
     setSessionMessages((prevMessages) => [...prevMessages, newMessage]);
+    setChatHistory((prevHistory) => [...prevHistory, newMessage]);
 
     try {
-      const storedUserInfo = localStorage.getItem('userInfo');
-      let userId = 'unknown_user';
+        const storedUserInfo = localStorage.getItem('userInfo');
+        let userId = 'unknown_user';
 
-      if (cookies.name) {
-        userId = cookies.name;
-      } else if (storedUserInfo) {
-        const parsedInfo = JSON.parse(storedUserInfo);
-        userId = parsedInfo.userId || 'unknown_user';
-      }
+        if (cookies.name) {
+            userId = cookies.name;
+        } else if (storedUserInfo) {
+            const parsedInfo = JSON.parse(storedUserInfo);
+            userId = parsedInfo.userId || 'unknown_user';
+        }
 
-      const response = await axios.post(
-        'http://localhost:5000/ask',
-        { user_id: userId, question },
-        { headers: { 'Content-Type': 'application/json' } }
-      );
+        const response = await axios.post(
+            'http://localhost:5000/ask',
+            { user_id: userId, question },
+            { headers: { 'Content-Type': 'application/json' } }
+        );
 
-      const botResponse: ChatLog = { sender: 'bot', message: response.data.response.replace(/<[^>]*>/g, ''), date: new Date().toISOString() };
-      
-      // 세션 메시지에 추가
-      setSessionMessages((prevMessages) => [...prevMessages, botResponse]);
+        const botResponse: ChatLog = {
+            sender: 'bot',
+            message: response.data.response.replace(/<[^>]*>/g, ''),
+            date: new Date().toISOString(),
+        };
+
+        // 봇 응답을 세션 메시지와 화면에 즉시 반영
+        setSessionMessages((prevMessages) => [...prevMessages, botResponse]);
+        setChatHistory((prevHistory) => [...prevHistory, botResponse]);
     } catch (error) {
-      console.error('응답을 가져오는 데 실패했습니다.');
+        console.error('응답을 가져오는 데 실패했습니다.');
     } finally {
-      setIsLoading(false);
-      setQuestion('');
-      if (inputRef.current) inputRef.current.focus();
+        setIsLoading(false);
+        setQuestion('');
+        if (inputRef.current) inputRef.current.focus();
     }
-  };
+};
+
+const displayLogs = (logs: ChatLog[], isTodayLog: boolean = false) => {
+    if (isTodayLog) {
+        // 오늘 로그일 경우 sessionMessages와 todayLogs 병합 시 중복 제거
+        const uniqueMessages = [...logs, ...sessionMessages].filter((message, index, self) =>
+            index === self.findIndex((m) => m.message === message.message && m.date === message.date)
+        );
+        setChatHistory(uniqueMessages);
+    } else {
+        // 오늘이 아닌 경우 그대로 설정
+        setChatHistory(logs);
+    }
+    setIsToday(isTodayLog); // 오늘 로그일 경우에만 입력과 전송 활성화
+};
+
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -157,20 +178,6 @@ const ChatBot: React.FC = () => {
   useEffect(() => {
     fetchChatLogs();
   }, []);
-
-  const displayLogs = (logs: ChatLog[], isTodayLog: boolean = false) => {
-    if (isTodayLog) {
-        // 오늘 로그일 경우 sessionMessages와 todayLogs 병합 시 중복 제거
-        const uniqueMessages = [...sessionMessages, ...logs].filter((message, index, self) =>
-            index === self.findIndex((m) => m.message === message.message && m.date === message.date)
-        );
-        setChatHistory(uniqueMessages);
-    } else {
-        // 오늘이 아닌 경우 그대로 설정
-        setChatHistory(logs);
-    }
-    setIsToday(isTodayLog); // 오늘 로그일 경우에만 입력과 전송 활성화
-};
 
   return (
     <div className={`flex h-screen ${darkMode ? 'bg-dark-mode text-light' : 'bg-light-mode text-dark'}`}>
