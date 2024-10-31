@@ -6,6 +6,7 @@ import SignUp from 'views/Authentication/SignUp';
 import SignIn from 'views/Authentication/SignIn';
 import OAuth from 'views/Authentication/OAuth';
 import ChatBot from 'views/Authentication/CahtBot/ChatBot';
+import Admin from 'views/Authentication/AdminPage/AdminPage';
 
 function App() {
 
@@ -15,6 +16,7 @@ function App() {
         <Route path='sign-up' element={<SignUp />} />
         <Route path='sign-in' element={<SignIn />} />
         <Route path='chat' element={<ChatBot />} />
+        <Route path='Admin' element={<Admin />} />
         <Route path='oauth-response/:token/:expirationTime' element={<OAuth />} />
         
         </Route>

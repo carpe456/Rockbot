@@ -1,0 +1,101 @@
+/* AdminPage.css */
+
+.admin-page-container {
+    padding: 80px 20px 20px;
+}
+
+.fixed-header-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f8f9fa;
+    padding: 10px;
+    display: flex;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.fixed-header {
+    width: 1000px;
+    margin: 0 auto;
+}
+
+button {
+    font-family: 'Pretendard-Regular';
+}
+
+button,
+.rejected,
+.approved {
+    transition: background-color 0.3s ease;
+}
+
+.logout-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    float: right;
+}
+
+.logout-button:hover {
+    background-color: hsl(211, 100%, 47%);
+}
+
+.request-list-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.trip-request {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.trip-info p {
+    margin: 5px 0;
+}
+
+.trip-actions {
+    margin-top: 10px;
+}
+
+.approve-button {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.approve-button:hover {
+    background-color: #218838;
+}
+
+.reject-button {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.reject-button:hover {
+    background-color: #c82333;
+}
+
+.approved {
+    background-color: #e6ffe6;
+}
+
+.rejected {
+    background-color: #ffe6e6;
+}
