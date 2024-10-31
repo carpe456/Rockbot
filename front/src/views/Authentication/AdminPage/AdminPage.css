@@ -31,7 +31,7 @@ button,
 }
 
 .logout-button {
-    background-color: #007bff;
+    background-color: #414141;
     color: #fff;
     border: none;
     padding: 8px 12px;
@@ -41,7 +41,7 @@ button,
 }
 
 .logout-button:hover {
-    background-color: hsl(211, 100%, 47%);
+    background-color: hsl(0, 0%, 21%);
 }
 
 .request-list-container {
@@ -66,7 +66,7 @@ button,
 }
 
 .approve-button {
-    background-color: #28a745;
+    background-color: #007bff;
     color: #fff;
     border: none;
     padding: 8px 12px;
@@ -76,7 +76,7 @@ button,
 }
 
 .approve-button:hover {
-    background-color: #218838;
+    background-color: hsl(211, 100%, 47%);
 }
 
 .reject-button {
@@ -93,9 +93,9 @@ button,
 }
 
 .approved {
-    background-color: #e6ffe6;
+    background-color: #f5f9ff;
 }
 
 .rejected {
-    background-color: #ffe6e6;
+    background-color: #fff4f4;
 }
