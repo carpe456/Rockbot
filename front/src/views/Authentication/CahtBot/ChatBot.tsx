@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './ChatBot.css';
-import { Unlock, Moon, Sun, Send, UserRound } from 'lucide-react';
+import { Unlock, Moon, Sun, Send } from 'lucide-react';
 import { useCookies } from 'react-cookie';
 
 interface ProfileInfo {
@@ -11,55 +11,56 @@ interface ProfileInfo {
   name?: string;
 }
 
+interface ChatLog {
+  sender: string;
+  message: string;
+  date: string;
+}
+
 const ChatBot: React.FC = () => {
   const [question, setQuestion] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [darkMode, setDarkMode] = useState<boolean>(false);
   const [showProfileSettings, setShowProfileSettings] = useState<boolean>(false);
+  const [isToday, setIsToday] = useState<boolean>(true); // 오늘 날짜인지 여부
+
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
-
-  const [profileInfo, setProfileInfo] = useState({ name: 'Guest' });
-  const [cookies, setCookie, removeCookie] = useCookies(['name', 'accessToken']);
+  const [profileInfo, setProfileInfo] = useState<ProfileInfo>({ name: 'Guest' });
+  const [cookies, , removeCookie] = useCookies(['name', 'accessToken']);
   const loc = useLocation();
-
-  const [chatHistory, setChatHistory] = useState<Array<{ sender: string; message: string }>>([]);
-
   const navigate = useNavigate();
+
+  const [chatHistory, setChatHistory] = useState<ChatLog[]>([]);
+  const [todayLogs, setTodayLogs] = useState<ChatLog[]>([]);
+  const [dateGroupedLogs, setDateGroupedLogs] = useState<{ [date: string]: ChatLog[] }>({});
 
   // 로그인 정보 출력
   useEffect(() => {
-    // `localStorage`와 쿠키 모두를 확인하여 가장 최신 값을 가져옵니다.
     const storedUserInfo = localStorage.getItem('userInfo');
     let userName = 'Guest';
 
     if (cookies.name) {
-        userName = cookies.name;
-        // console.log("쿠키에서 가져온 이름:", cookies.name);
+      userName = cookies.name;
     } else if (storedUserInfo) {
-        const parsedInfo = JSON.parse(storedUserInfo);
-        userName = parsedInfo.name || 'Guest';
-        //console.log("로컬 스토리지에서 가져온 이름:", userName);
-    } else {
-        console.log("기본값 이름: Guest");
+      const parsedInfo = JSON.parse(storedUserInfo);
+      userName = parsedInfo.name || 'Guest';
     }
 
-    // 최종 이름 설정
     setProfileInfo({ name: userName });
-}, [cookies, loc]);
+  }, [cookies, loc]);
 
-useEffect(() => {
-  // profileInfo가 로드된 후 초기 메시지 설정
-  setChatHistory([{ sender: 'bot', message: `${profileInfo.name}님 무엇을 도와드릴까요?` }]);
-}, [profileInfo]);
+  useEffect(() => {
+    setChatHistory([{ sender: 'bot', message: `${profileInfo.name}님 무엇을 도와드릴까요?`, date: '' }]);
+  }, [profileInfo]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuestion(e.target.value);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSend(); // 엔터 키가 눌리면 handleSend 함수 실행
+    if (e.key === 'Enter' && isToday) { // 오늘일 때만 전송 가능
+      handleSend();
     }
   };
 
@@ -67,44 +68,46 @@ useEffect(() => {
     if (!question.trim()) return;
 
     setIsLoading(true);
-    const newChatHistory = [...chatHistory, { sender: 'user', message: question }];
-    setChatHistory(newChatHistory);
+    setChatHistory((prevHistory) => [...prevHistory, { sender: 'user', message: question, date: '' }]);
 
     try {
-      // Flask 서버에 질문을 보냅니다.
-      const response = await axios.post('http://localhost:5000/ask', {
-        question: question,
-      });
+      const storedUserInfo = localStorage.getItem('userInfo');
+      let userId = 'unknown_user';
 
-      // 서버의 응답을 받아 chatHistory에 추가합니다.
+      if (cookies.name) {
+        userId = cookies.name;
+      } else if (storedUserInfo) {
+        const parsedInfo = JSON.parse(storedUserInfo);
+        userId = parsedInfo.userId || 'unknown_user';
+      }
+
+      const response = await axios.post(
+        'http://localhost:5000/ask',
+        { user_id: userId, question },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+
+      let cleanAnswer = response.data.response;
+
+      // <br> 태그를 개행으로 변경하고, 나머지 HTML 태그 제거
+      cleanAnswer = cleanAnswer.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '');
+
       setChatHistory((prevHistory) => [
         ...prevHistory,
-        { sender: 'bot', message: response.data.answer }, // 서버에서 받아온 응답 사용
+        { sender: 'bot', message: cleanAnswer, date: '' },
       ]);
     } catch (error) {
-      // 서버와의 연결이 실패했을 경우
       setChatHistory((prevHistory) => [
         ...prevHistory,
-        { sender: 'bot', message: '응답을 가져오는 데 실패했습니다.' },
+        { sender: 'bot', message: '응답을 가져오는 데 실패했습니다.', date: '' },
       ]);
     } finally {
       setIsLoading(false);
-    }
-    setQuestion('');
-
-    // 메시지 전송 후 입력 필드에 포커스를 유지
-    if (inputRef.current && !isLoading) {
-      inputRef.current.focus();
+      setQuestion('');
+      if (inputRef.current) inputRef.current.focus();
     }
   };
 
-  useEffect(() => {
-    if (inputRef.current && !isLoading) {
-      inputRef.current.focus(); // question 상태가 변경되면 입력 필드에 포커스를 설정합니다.
-    }
-  }, [question]);
-
-  // 새로운 메시지 추가될 때마다 스크롤을 맨 아래로 내림
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -113,10 +116,6 @@ useEffect(() => {
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
 
-  const toggleProfileSettings = () => {
-    setShowProfileSettings(!showProfileSettings);
-  };
-
   const handleLogout = () => {
     removeCookie('name', { path: '/' });
     removeCookie('accessToken', { path: '/' });
@@ -124,23 +123,77 @@ useEffect(() => {
     navigate('/auth/sign-in');
   };
 
+  // 날짜별 채팅 로그 가져오기
+  const fetchChatLogs = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/chat-logs');
+      const data = response.data || {};
+
+      const today = data.today || [];
+      const last7Days = data.last_7_days || [];
+
+      const formatLogs = (logs: { question: string; response: string; timestamp: string }[]): ChatLog[] =>
+        logs.flatMap((log) => [
+          { sender: 'user', message: log.question, date: log.timestamp },
+          { sender: 'bot', message: log.response, date: log.timestamp },
+        ]);
+
+      setTodayLogs(formatLogs(today));
+
+      // 날짜별로 그룹화하여 dateGroupedLogs에 저장
+      const groupedLogs: { [date: string]: ChatLog[] } = last7Days.reduce(
+        (acc: { [date: string]: ChatLog[] }, log: { question: string; response: string; timestamp: string }) => {
+          const date = new Date(log.timestamp).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+          if (!acc[date]) acc[date] = [];
+          acc[date].push({ sender: 'user', message: log.question, date: log.timestamp });
+          acc[date].push({ sender: 'bot', message: log.response, date: log.timestamp });
+          return acc;
+        },
+        {} as { [date: string]: ChatLog[] }
+      );
+
+      setDateGroupedLogs(groupedLogs);
+    } catch (error) {
+      console.error('채팅 로그를 가져오는 중 오류 발생:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchChatLogs();
+  }, []);
+
+  const displayLogs = (logs: ChatLog[], isTodayLog: boolean = false) => {
+    setChatHistory(logs);
+    setIsToday(isTodayLog); // 오늘 로그일 경우에만 입력과 전송 활성화
+  };
+
   return (
     <div className={`flex h-screen ${darkMode ? 'bg-dark-mode text-light' : 'bg-light-mode text-dark'}`}>
-       {/* 사이드바 */}
-       <div className="sidebar-container">
-        {/* 상단에 위치할 요소들 */}
-        <div>
-          <div className="profile-container mb-4">
-            {profileInfo.name && (
-              <p className="profile-user-id">{profileInfo.name}<span className="small-text">님</span></p> // 사용자 ID 표시
-            )}
+      {/* 사이드바 */}
+      <div className="sidebar-container">
+        <div className="profile-container mb-4">
+          {profileInfo.name && (
+            <p className="profile-user-id">
+              {profileInfo.name}
+              <span className="small-text">님</span>
+            </p>
+          )}
+
+          {/* 날짜별 로그 표시 */}
+          <div className="date-log-container">
+            <ul>
+              <li onClick={() => displayLogs(todayLogs, true)} className="log-item">
+                오늘
+              </li>
+              {Object.keys(dateGroupedLogs).map((date) => (
+                <li key={date} onClick={() => displayLogs(dateGroupedLogs[date], false)} className="log-item">
+                  {date}
+                </li>
+              ))}
+            </ul>
           </div>
-          {/* <button onClick={toggleProfileSettings} className="button profile-settings-button">
-            <UserRound size={15} className="icon-spacing" /> 비밀번호 변경
-          </button> */}
         </div>
 
-        {/* 하단에 위치시킬 버튼들 */}
         <div className="sidebar-bottom-buttons">
           <button onClick={toggleDarkMode} className="button dark-mode-toggle-button">
             {darkMode ? <Sun size={16} className="icon-spacing" /> : <Moon size={15} className="icon-spacing" />}
@@ -154,31 +207,24 @@ useEffect(() => {
 
       {/* 대화창 */}
       <div className="chat-window-container">
-        {showProfileSettings && (
-          <div className="profile-settings-container">
-            {/* <h3 className="profile-settings-header">비밀번호 변경</h3>
-            <input
-              type="password"
-              value={profileInfo.password || ''}
-              onChange={(e) => setProfileInfo({ ...profileInfo, password: e.target.value })}
-              className="input-field-password"
-              placeholder="변경하실 비밀번호를 입력하세요"
-            />
-            <button onClick={toggleProfileSettings} className="button profile-settings-save-button">
-              저장
-            </button> */}
-          </div>
-        )}
+        {showProfileSettings && <div className="profile-settings-container"></div>}
 
-<div className="chat-messages-container" ref={chatContainerRef}>
+        <div className="chat-messages-container" ref={chatContainerRef}>
           {chatHistory.map((chat, index) => (
             <div
               key={index}
               className={`message-container ${chat.sender === 'user' ? 'user-message' : 'bot-message'}`}
             >
-              <div className={`message-bubble ${chat.sender === 'user' ? 'user-bubble' : 'bot-bubble'}`}>{
-                chat.message
-              }</div>
+              <div className={`message-bubble ${chat.sender === 'user' ? 'user-bubble' : 'bot-bubble'}`}>
+                {chat.message.split("\n").map((line, index) => (
+                  <span key={index}>
+                    {line}
+                    <br />
+                  </span>
+                ))}
+              </div>
+
+
             </div>
           ))}
         </div>
@@ -192,9 +238,9 @@ useEffect(() => {
               ref={inputRef}
               className="input-field chat-input"
               placeholder="질문을 입력하세요..."
-              disabled={isLoading}
+              disabled={!isToday || isLoading} // 오늘 로그가 아닐 때 비활성화
             />
-            <button onClick={handleSend} className="button send-button" disabled={isLoading}>
+            <button onClick={handleSend} className="button send-button" disabled={!isToday || isLoading}>
               <Send size={20} />
             </button>
           </div>

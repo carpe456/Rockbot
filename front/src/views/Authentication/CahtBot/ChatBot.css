@@ -367,3 +367,33 @@ html {
 .profile-settings-save-button:hover {
   background-color: #0056b3;
 } */
+
+.date-log-container ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.log-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  margin-bottom: 4px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.log-item:hover {
+  background-color: #f0f0f0;
+}
+
+.log-item:active {
+  background-color: #ddd;
+}
+
+.bg-dark-mode .log-item {
+  border: 1px solid #46536b;
+}
+
+.bg-dark-mode .log-item:hover {
+  background-color: hwb(219 22% 66%);
+}
