@@ -78,6 +78,15 @@ const AdminPage: React.FC = () => {
         navigate('/auth/sign-in');
     };
 
+    // 오늘부터 7일 이내 출장 목록 필터링
+    const upcomingTravelRequests = travelRequests.filter((request) => {
+        const today = new Date();
+        const travelDate = new Date(request.travel_date);
+        const diffTime = travelDate.getTime() - today.getTime();
+        const diffDays = diffTime / (1000 * 60 * 60 * 24);
+        return diffDays >= 0 && diffDays <= 7;
+    });
+
     return (
         <div className="admin-page-container">
             <div className="fixed-header-container">
@@ -120,11 +129,22 @@ const AdminPage: React.FC = () => {
                             </div>
                         )}
                     </div>
-
-
                 ))}
             </div>
 
+            <div className="upcoming-travel-container">
+                <h2>출장 목록</h2>
+                
+                {upcomingTravelRequests.map((request) => (
+                    <div key={request.request_id} className="upcoming-trip-info">
+                        <p>사용자 ID: {request.user_id}</p>
+                        <p>부서 ID: {request.department_id}</p>
+                        <p>목적지: {request.destination}</p>
+                        <p>출장 날짜: {request.travel_date}</p>
+                        <p>사유: {request.reason}</p>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };
