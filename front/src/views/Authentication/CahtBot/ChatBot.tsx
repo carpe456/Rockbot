@@ -31,7 +31,8 @@ const ChatBot: React.FC = () => {
   const loc = useLocation();
   const navigate = useNavigate();
 
-  const [chatHistory, setChatHistory] = useState<ChatLog[]>([]);
+  const [chatHistory, setChatHistory] = useState<ChatLog[]>([]); // 전체 대화 기록
+  const [sessionMessages, setSessionMessages] = useState<ChatLog[]>([]); // 세션 동안 작성한 메시지
   const [todayLogs, setTodayLogs] = useState<ChatLog[]>([]);
   const [dateGroupedLogs, setDateGroupedLogs] = useState<{ [date: string]: ChatLog[] }>({});
 
@@ -68,7 +69,10 @@ const ChatBot: React.FC = () => {
     if (!question.trim()) return;
 
     setIsLoading(true);
-    setChatHistory((prevHistory) => [...prevHistory, { sender: 'user', message: question, date: '' }]);
+    const newMessage: ChatLog = { sender: 'user', message: question, date: new Date().toISOString() };
+
+    // 세션 메시지에 추가
+    setSessionMessages((prevMessages) => [...prevMessages, newMessage]);
 
     try {
       const storedUserInfo = localStorage.getItem('userInfo');
@@ -87,20 +91,12 @@ const ChatBot: React.FC = () => {
         { headers: { 'Content-Type': 'application/json' } }
       );
 
-      let cleanAnswer = response.data.response;
-
-      // <br> 태그를 개행으로 변경하고, 나머지 HTML 태그 제거
-      cleanAnswer = cleanAnswer.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '');
-
-      setChatHistory((prevHistory) => [
-        ...prevHistory,
-        { sender: 'bot', message: cleanAnswer, date: '' },
-      ]);
+      const botResponse: ChatLog = { sender: 'bot', message: response.data.response.replace(/<[^>]*>/g, ''), date: new Date().toISOString() };
+      
+      // 세션 메시지에 추가
+      setSessionMessages((prevMessages) => [...prevMessages, botResponse]);
     } catch (error) {
-      setChatHistory((prevHistory) => [
-        ...prevHistory,
-        { sender: 'bot', message: '응답을 가져오는 데 실패했습니다.', date: '' },
-      ]);
+      console.error('응답을 가져오는 데 실패했습니다.');
     } finally {
       setIsLoading(false);
       setQuestion('');
@@ -163,9 +159,18 @@ const ChatBot: React.FC = () => {
   }, []);
 
   const displayLogs = (logs: ChatLog[], isTodayLog: boolean = false) => {
-    setChatHistory(logs);
+    if (isTodayLog) {
+        // 오늘 로그일 경우 sessionMessages와 todayLogs 병합 시 중복 제거
+        const uniqueMessages = [...sessionMessages, ...logs].filter((message, index, self) =>
+            index === self.findIndex((m) => m.message === message.message && m.date === message.date)
+        );
+        setChatHistory(uniqueMessages);
+    } else {
+        // 오늘이 아닌 경우 그대로 설정
+        setChatHistory(logs);
+    }
     setIsToday(isTodayLog); // 오늘 로그일 경우에만 입력과 전송 활성화
-  };
+};
 
   return (
     <div className={`flex h-screen ${darkMode ? 'bg-dark-mode text-light' : 'bg-light-mode text-dark'}`}>
@@ -223,8 +228,6 @@ const ChatBot: React.FC = () => {
                   </span>
                 ))}
               </div>
-
-
             </div>
           ))}
         </div>
