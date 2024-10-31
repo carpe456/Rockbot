@@ -45,18 +45,24 @@ export default function SignIn() {
     
         const { token, expirationTime, userId, name } = ResponseBody as SignInResponseDto;
     
-        const now = (new Date().getTime())*1000;
+        const now = new Date().getTime() * 1000;
         const expires = new Date(now + expirationTime);
-        
+    
         setCookie('accessToken', token, { expires, path: '/' });
     
         localStorage.setItem('userInfo', JSON.stringify({ userId, token, name }));
-
+    
         setLoggedName(name);
-        
-        // 로그인 후 채팅창으로 이동
-        navigate('/auth/chat', { state: { name } });
-    };    
+    
+        // 로그인 후 조건에 따라 페이지 이동
+        if (userId === 'Admin') {
+            // Admin 사용자인 경우 관리 페이지로 이동
+            navigate('/auth/Admin');
+        } else {
+            // 일반 사용자일 경우 채팅창으로 이동
+            navigate('/auth/chat', { state: { name } });
+        }
+    };
 
     useEffect(() => {
         const storedUserInfo = localStorage.getItem('userInfo');

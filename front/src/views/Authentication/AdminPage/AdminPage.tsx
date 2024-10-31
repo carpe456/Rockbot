@@ -5,7 +5,7 @@ import './AdminPage.css';
 
 interface TravelRequest {
     request_id: number;
-    user_id: string;
+    name: string;
     department_id: number;
     destination: string;
     travel_date: string;
@@ -19,7 +19,7 @@ const AdminPage: React.FC = () => {
     const [travelRequests, setTravelRequests] = useState<TravelRequest[]>([
         {
             request_id: 1,
-            user_id: 'user123',
+            name: 'user123',
             department_id: 1,
             destination: '서울',
             travel_date: '2024-11-01',
@@ -30,7 +30,7 @@ const AdminPage: React.FC = () => {
         },
         {
             request_id: 2,
-            user_id: 'user456',
+            name: 'user456',
             department_id: 2,
             destination: '부산',
             travel_date: '2024-11-10',
@@ -41,7 +41,7 @@ const AdminPage: React.FC = () => {
         },
         {
             request_id: 3,
-            user_id: 'user789',
+            name: 'user789',
             department_id: 3,
             destination: '대전',
             travel_date: '2024-11-15',
@@ -105,7 +105,7 @@ const AdminPage: React.FC = () => {
                         className={`trip-request ${request.status.toLowerCase()}`}
                     >
                         <div className="trip-info">
-                            <p className="trip-name">사용자 ID: {request.user_id}</p>
+                            <p className="trip-name">이름: {request.name}</p>
                             <p className="trip-department">부서 ID: {request.department_id}</p>
                             <p className="trip-destination">목적지: {request.destination}</p>
                             <p className="trip-dates">출장 날짜: {request.travel_date} - {request.return_date}</p>
@@ -134,10 +134,10 @@ const AdminPage: React.FC = () => {
 
             <div className="upcoming-travel-container">
                 <h2>출장 목록</h2>
-                
+
                 {upcomingTravelRequests.map((request) => (
                     <div key={request.request_id} className="upcoming-trip-info">
-                        <p>사용자 ID: {request.user_id}</p>
+                        <p>이름: {request.name}</p>
                         <p>부서 ID: {request.department_id}</p>
                         <p>목적지: {request.destination}</p>
                         <p>출장 날짜: {request.travel_date}</p>
