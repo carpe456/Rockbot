@@ -2,6 +2,7 @@ package com.rockbot.back.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
@@ -46,8 +47,10 @@ public class WebSecurityConfig {
                                 .sessionManagement(sessionManagement -> sessionManagement
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(request -> request
+                                                .requestMatchers(HttpMethod.PUT, "/api/v1/user/*/department")
+                                                .hasRole("ADMIN") // 부서 변경은 ADMIN만
                                                 .requestMatchers("/", "/api/v1/auth/**", "/oauth2/**").permitAll()
-                                                .requestMatchers("/api/v1/user/**").hasRole("USER")
+                                                .requestMatchers("/api/v1/user/**").hasAnyRole("USER", "ADMIN")
                                                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())
                                 .oauth2Login(oauth2 -> oauth2

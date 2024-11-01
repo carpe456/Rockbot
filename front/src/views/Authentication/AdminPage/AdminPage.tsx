@@ -23,6 +23,22 @@ interface TravelRequest {
     submission_date: string;
 }
 
+    // 부서 ID에 따른 부서 이름 설정 함수
+    const getDepartmentName = (departmentId: number) => {
+        switch (departmentId) {
+            case 1:
+                return '임시부서';
+            case 2:
+                return '인사부서';
+            case 3:
+                return '편성부서';
+            case 4:
+                return '제작부서';
+            default:
+                return '알 수 없음';
+        }
+    };
+
 const AdminPage: React.FC = () => {
     const [travelRequests, setTravelRequests] = useState<TravelRequest[]>([
         {
@@ -98,21 +114,34 @@ const AdminPage: React.FC = () => {
 
     const handleDepartmentChange = async (userId: string, newDepartmentId: number) => {
         try {
-            await axios.put(`http://localhost:4040/api/v1/user/${userId}/department`, {
-                departmentId: newDepartmentId,
-            });
+            const token = cookies.accessToken;
+            if (!token) {
+                alert("로그인이 필요합니다.");
+                return;
+            }
+    
+            const response = await axios.put(
+                `http://localhost:4040/api/v1/user/${userId}/department`,
+                { departmentId: newDepartmentId },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            console.log("부서 변경 응답:", response.data);
             setUsers((prevUsers) =>
                 prevUsers.map((user) =>
                     user.userId === userId ? { ...user, departmentId: newDepartmentId } : user
                 )
             );
-            alert('부서 ID가 성공적으로 수정되었습니다.');
+            alert("부서가 성공적으로 변경되었습니다.");
         } catch (error) {
-            console.error('부서 ID 수정 중 오류 발생:', error);
-            alert('부서 ID 수정에 실패했습니다.');
+            console.error("부서 변경 중 오류 발생:", error);
+            alert("부서 변경에 실패했습니다.");
         }
-    };
-
+    };    
+    
     const toggleDarkMode = () => {
         setDarkMode(!darkMode);
     };
@@ -159,13 +188,13 @@ const AdminPage: React.FC = () => {
                     {travelRequests.map((request) => (
                         <div key={request.request_id} className="trip-item">
                             <div className="trip-info">
-                                <p className="trip-name">이름: {request.name}</p>
-                                <p className="trip-department">부서 ID: {request.department_id}</p>
-                                <p className="trip-destination">목적지: {request.destination}</p>
+                                <p className="trip-name">이름 : {request.name}</p>
+                                <p className="trip-department">부서 ID : {request.department_id}</p>
+                                <p className="trip-destination">목적지 : {request.destination}</p>
                                 <p className="trip-dates">
-                                    출장 날짜: {request.travel_date} - {request.return_date}
+                                    출장 날짜 : {request.travel_date} - {request.return_date}
                                 </p>
-                                <p className="trip-reason">사유: {request.reason}</p>
+                                <p className="trip-reason">사유 : {request.reason}</p>
                             </div>
                         </div>
                     ))}
@@ -177,14 +206,14 @@ const AdminPage: React.FC = () => {
                     {travelRequests.map((request) => (
                         <div key={request.request_id} className={`trip-request ${request.status.toLowerCase()}`}>
                             <div className="trip-info">
-                                <p className="trip-name">이름: {request.name}</p>
-                                <p className="trip-department">부서 ID: {request.department_id}</p>
-                                <p className="trip-destination">목적지: {request.destination}</p>
+                                <p className="trip-name">이름 : {request.name}</p>
+                                <p className="trip-department">부서 : {request.department_id}</p>
+                                <p className="trip-destination">목적지 : {request.destination}</p>
                                 <p className="trip-dates">
-                                    출장 날짜: {request.travel_date} - {request.return_date}
+                                    출장 날짜 : {request.travel_date} - {request.return_date}
                                 </p>
-                                <p className="trip-reason">사유: {request.reason}</p>
-                                <p className="trip-submission-date">신청 날짜: {request.submission_date}</p>
+                                <p className="trip-reason">사유 : {request.reason}</p>
+                                <p className="trip-submission-date">신청 날짜 : {request.submission_date}</p>
                             </div>
                             {request.status === 'Pending' && (
                                 <div className="trip-actions">
@@ -205,8 +234,8 @@ const AdminPage: React.FC = () => {
                 <div className="user-list-container">
                     {users.map((user) => (
                         <div key={user.userId} className="user-info">
-                            <p>이름: {user.name}</p>
-                            <p>부서: {user.departmentId}</p>
+                            <p>이름 : {user.name}</p>
+                            <p>부서 : {getDepartmentName(user.departmentId)}</p>
                             <label>
                                 부서 변경
                                 <select
@@ -214,10 +243,10 @@ const AdminPage: React.FC = () => {
                                     value={user.departmentId}
                                     onChange={(e) => handleDepartmentChange(user.userId, parseInt(e.target.value))}
                                 >
-                                    <option value={1}>부서 1</option>
-                                    <option value={2}>부서 2</option>
-                                    <option value={3}>부서 3</option>
-                                    <option value={4}>부서 4</option>
+                                    <option value={1}>임시부서</option>
+                                    <option value={2}>인사부서</option>
+                                    <option value={3}>편성부서</option>
+                                    <option value={4}>제작부서</option>
                                 </select>
                             </label>
 

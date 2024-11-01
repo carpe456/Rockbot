@@ -72,4 +72,8 @@ public class UserEntity {
     public int getDepartmentId() {
         return departmentId;
     }
+
+    public void setDepartmentId(int departmentId) {
+        this.departmentId = departmentId;
+    }
 }

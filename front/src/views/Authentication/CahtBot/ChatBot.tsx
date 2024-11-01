@@ -43,7 +43,7 @@ const ChatBot: React.FC = () => {
   const getDepartmentName = (departmentId: number) => {
     switch (departmentId) {
       case 0:
-        return '미지정';
+        return '임시부서';
       case 1:
         return '인사부서';
       case 2:
