@@ -52,7 +52,7 @@ const AdminPage: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [cookies, , removeCookie] = useCookies(['name', 'accessToken']);
     const navigate = useNavigate();
-    const [selectedMenu, setSelectedMenu] = useState<'travelRequests' | 'users' | 'travelList'>('travelRequests');
+    const [selectedMenu, setSelectedMenu] = useState<'travelList' | 'travelRequests' | 'users'>('travelList');
     const [darkMode, setDarkMode] = useState<boolean>(false);
 
     useEffect(() => {
@@ -119,93 +119,114 @@ const AdminPage: React.FC = () => {
 
     return (
         <div className={`flex h-screen ${darkMode ? 'bg-dark-mode text-light' : 'bg-light-mode text-dark'}`}>
-          {/* 사이드바 */}
-<div className="sidebar-container">
-  <div className="sidebar-menu">
-    <button
-      className={`menu-item ${selectedMenu === 'travelList' ? 'active' : ''}`}
-      onClick={() => setSelectedMenu('travelList')}
-    >
-      출장 목록
-    </button>
-    <button
-      className={`menu-item ${selectedMenu === 'travelRequests' ? 'active' : ''}`}
-      onClick={() => setSelectedMenu('travelRequests')}
-    >
-      출장 결재 목록
-    </button>
-    <button
-      className={`menu-item ${selectedMenu === 'users' ? 'active' : ''}`}
-      onClick={() => setSelectedMenu('users')}
-    >
-      회원 목록
-    </button>
-  </div>
+            {/* 사이드바 */}
+            <div className="sidebar-container">
+                <div className="sidebar-menu">
+                    <button
+                        className={`menu-item ${selectedMenu === 'travelList' ? 'active' : ''}`}
+                        onClick={() => setSelectedMenu('travelList')}
+                    >
+                        출장 목록
+                    </button>
+                    <button
+                        className={`menu-item ${selectedMenu === 'travelRequests' ? 'active' : ''}`}
+                        onClick={() => setSelectedMenu('travelRequests')}
+                    >
+                        출장 결재 목록
+                    </button>
+                    <button
+                        className={`menu-item ${selectedMenu === 'users' ? 'active' : ''}`}
+                        onClick={() => setSelectedMenu('users')}
+                    >
+                        회원 목록
+                    </button>
+                </div>
 
-    
-            <div className="sidebar-bottom-buttons">
-              <button className="button dark-mode-toggle-button" onClick={toggleDarkMode}>
-                {darkMode ? <Sun size={16} className="icon-spacing" /> : <Moon size={15} className="icon-spacing" />}
-                {darkMode ? '라이트 모드' : '다크 모드'}
-              </button>
-              <button onClick={handleLogout} className="button navigate-button">
-                <Unlock size={15} className="icon-spacing" /> 로그아웃
-              </button>
-            </div>
-          </div>
-    
-          {/* 메인 콘텐츠 */}
-          {selectedMenu === 'travelRequests' && (
-            <div className="request-list-container">
-              <h2>출장 결재 목록</h2>
-              {travelRequests.map((request) => (
-                <div key={request.request_id} className={`trip-request ${request.status.toLowerCase()}`}>
-                  <div className="trip-info">
-                    <p className="trip-name">이름: {request.name}</p>
-                    <p className="trip-department">부서 ID: {request.department_id}</p>
-                    <p className="trip-destination">목적지: {request.destination}</p>
-                    <p className="trip-dates">
-                      출장 날짜: {request.travel_date} - {request.return_date}
-                    </p>
-                    <p className="trip-reason">사유: {request.reason}</p>
-                    <p className="trip-submission-date">신청 날짜: {request.submission_date}</p>
-                  </div>
-                  {request.status === 'Pending' && (
-                    <div className="trip-actions">
-                      <button className="approve-button" onClick={() => handleApprove(request.request_id)}>
-                        ✔ 승인
-                      </button>
-                      <button className="reject-button" onClick={() => handleReject(request.request_id)}>
-                        ✖ 거절
-                      </button>
-                    </div>
-                  )}
+                <div className="sidebar-bottom-buttons">
+                    <button className="button dark-mode-toggle-button" onClick={toggleDarkMode}>
+                        {darkMode ? <Sun size={16} className="icon-spacing" /> : <Moon size={15} className="icon-spacing" />}
+                        {darkMode ? '라이트 모드' : '다크 모드'}
+                    </button>
+                    <button onClick={handleLogout} className="button navigate-button">
+                        <Unlock size={15} className="icon-spacing" /> 로그아웃
+                    </button>
                 </div>
-              ))}
             </div>
-          )}
-    
-          {selectedMenu === 'users' && (
-            <div className="user-list-container">
-              <h2>회원 목록</h2>
-              {users.map((user) => (
-                <div key={user.userId} className="user-info">
-                  <p>이름: {user.name}</p>
-                  <p>부서 ID: {user.departmentId}</p>
-                  <label>
-                    부서 ID 수정:
-                    <input
-                      type="number"
-                      value={user.departmentId}
-                      onChange={(e) => handleDepartmentChange(user.userId, parseInt(e.target.value))}
-                    />
-                  </label>
+
+            {/* 출장 목록 */}
+            {selectedMenu === 'travelList' && (
+                <div className="travel-list-container">
+                    {travelRequests.map((request) => (
+                        <div key={request.request_id} className="trip-item">
+                            <div className="trip-info">
+                                <p className="trip-name">이름: {request.name}</p>
+                                <p className="trip-department">부서 ID: {request.department_id}</p>
+                                <p className="trip-destination">목적지: {request.destination}</p>
+                                <p className="trip-dates">
+                                    출장 날짜: {request.travel_date} - {request.return_date}
+                                </p>
+                                <p className="trip-reason">사유: {request.reason}</p>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-              ))}
-            </div>
-          )}
+            )}
+
+            {selectedMenu === 'travelRequests' && (
+                <div className="request-list-container">
+                    {travelRequests.map((request) => (
+                        <div key={request.request_id} className={`trip-request ${request.status.toLowerCase()}`}>
+                            <div className="trip-info">
+                                <p className="trip-name">이름: {request.name}</p>
+                                <p className="trip-department">부서 ID: {request.department_id}</p>
+                                <p className="trip-destination">목적지: {request.destination}</p>
+                                <p className="trip-dates">
+                                    출장 날짜: {request.travel_date} - {request.return_date}
+                                </p>
+                                <p className="trip-reason">사유: {request.reason}</p>
+                                <p className="trip-submission-date">신청 날짜: {request.submission_date}</p>
+                            </div>
+                            {request.status === 'Pending' && (
+                                <div className="trip-actions">
+                                    <button className="approve-button" onClick={() => handleApprove(request.request_id)}>
+                                        ✔ 승인
+                                    </button>
+                                    <button className="reject-button" onClick={() => handleReject(request.request_id)}>
+                                        ✖ 거절
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {selectedMenu === 'users' && (
+                <div className="user-list-container">
+                    {users.map((user) => (
+                        <div key={user.userId} className="user-info">
+                            <p>이름: {user.name}</p>
+                            <p>부서: {user.departmentId}</p>
+                            <label>
+                                부서 변경
+                                <select
+                                    className="custom-select"
+                                    value={user.departmentId}
+                                    onChange={(e) => handleDepartmentChange(user.userId, parseInt(e.target.value))}
+                                >
+                                    <option value={1}>부서 1</option>
+                                    <option value={2}>부서 2</option>
+                                    <option value={3}>부서 3</option>
+                                    <option value={4}>부서 4</option>
+                                </select>
+                            </label>
+
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
-      );
-    };
-    
-    export default AdminPage;
+    );
+};
+
+export default AdminPage;
