@@ -27,6 +27,9 @@ public class UserEntity {
     private String type;
     private String role;
 
+    @Column(name = "department_id") // 부서 ID 필드 추가
+    private int departmentId;
+
     public UserEntity(SignUpRequestDto dto) {
         this.userId = dto.getId();
         this.password = dto.getPassword();
@@ -34,6 +37,7 @@ public class UserEntity {
         this.email = dto.getEmail();
         this.type = "app";
         this.role = "ROLE_USER";
+        this.departmentId = 1;
     }
 
     public UserEntity(String userId, String email, String name, String type) {
@@ -43,6 +47,7 @@ public class UserEntity {
         this.email = email;
         this.type = type;
         this.role = "ROLE_USER";
+        this.departmentId = 1;
     }
 
     // OAuth2UserServiceImplement에서 사용하는 새로운 생성자
@@ -53,6 +58,7 @@ public class UserEntity {
         this.email = email;
         this.type = type;
         this.role = "ROLE_USER"; // 기본 역할 설정
+        this.departmentId = 1;
     }
 
     public String getUserId() {
@@ -61,5 +67,9 @@ public class UserEntity {
 
     public String getName() {
         return name;
+    }
+
+    public int getDepartmentId() {
+        return departmentId;
     }
 }

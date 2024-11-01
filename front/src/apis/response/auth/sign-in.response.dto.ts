@@ -5,4 +5,5 @@ export default interface SignInResponseDto extends ResponseDto {
     expirationTime: number;
     userId: string;
     name: string;
+    departmentId: number;
 }

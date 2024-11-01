@@ -31,7 +31,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         String userId = oAuth2User.getUserId();
         String name = oAuth2User.getName();
-        String token = jwtProvider.create(userId, name);
+        int departmentId = 1;
+        String token = jwtProvider.create(userId, name, departmentId);
         int expirationTime = 3600; // 토큰 유효 시간 (초)
 
         // 쿠키로 정보 설정

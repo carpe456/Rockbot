@@ -9,6 +9,8 @@ interface ProfileInfo {
   password?: string;
   userId?: string;
   name?: string;
+  departmentId?: number;
+  departmentName?: string;
 }
 
 interface ChatLog {
@@ -36,19 +38,41 @@ const ChatBot: React.FC = () => {
   const [todayLogs, setTodayLogs] = useState<ChatLog[]>([]);
   const [dateGroupedLogs, setDateGroupedLogs] = useState<{ [date: string]: ChatLog[] }>({});
 
+  // 부서 ID에 따른 부서 이름 설정 함수
+  const getDepartmentName = (departmentId: number) => {
+    switch (departmentId) {
+      case 0:
+        return '미지정';
+      case 1:
+        return '인사부서';
+      case 2:
+        return '편성부서';
+      case 3:
+        return '제작부서';
+      default:
+        return '알 수 없음';
+    }
+  };
+
   // 로그인 정보 출력
   useEffect(() => {
     const storedUserInfo = localStorage.getItem('userInfo');
     let userName = 'Guest';
+    let userId = 'unknown_user';
+    let departmentId = 1;
 
     if (cookies.name) {
       userName = cookies.name;
+      userId = cookies.name; // userId 설정
     } else if (storedUserInfo) {
       const parsedInfo = JSON.parse(storedUserInfo);
+      console.log('Parsed userInfo:', parsedInfo);
       userName = parsedInfo.name || 'Guest';
+      userId = parsedInfo.userId || 'unknown_user'; // userId 설정
+      departmentId = parsedInfo.departmentId || 'department';
     }
-
-    setProfileInfo({ name: userName });
+  
+    setProfileInfo({ name: userName, userId, departmentId, departmentName: getDepartmentName(departmentId) }); // userId 추가 설정
   }, [cookies, loc]);
 
   useEffect(() => {
@@ -86,11 +110,15 @@ const ChatBot: React.FC = () => {
             userId = parsedInfo.userId || 'unknown_user';
         }
 
+        console.log('Sending request to server:', { user_id: userId, question });
+
         const response = await axios.post(
             'http://localhost:5000/ask',
             { user_id: userId, question },
             { headers: { 'Content-Type': 'application/json' } }
         );
+
+        console.log('Server response:', response.data);
 
         const botResponse: ChatLog = {
             sender: 'bot',
@@ -102,7 +130,11 @@ const ChatBot: React.FC = () => {
         setSessionMessages((prevMessages) => [...prevMessages, botResponse]);
         setChatHistory((prevHistory) => [...prevHistory, botResponse]);
     } catch (error) {
-        console.error('응답을 가져오는 데 실패했습니다.');
+        if (axios.isAxiosError(error)) {
+            console.error('Axios error:', error.response?.data);
+        } else {
+            console.error('응답을 가져오는 데 실패했습니다.', error);
+        }
     } finally {
         setIsLoading(false);
         setQuestion('');
@@ -110,20 +142,35 @@ const ChatBot: React.FC = () => {
     }
 };
 
-const displayLogs = (logs: ChatLog[], isTodayLog: boolean = false) => {
-    if (isTodayLog) {
-        // 오늘 로그일 경우 sessionMessages와 todayLogs 병합 시 중복 제거
-        const uniqueMessages = [...logs, ...sessionMessages].filter((message, index, self) =>
-            index === self.findIndex((m) => m.message === message.message && m.date === message.date)
-        );
-        setChatHistory(uniqueMessages);
-    } else {
-        // 오늘이 아닌 경우 그대로 설정
-        setChatHistory(logs);
-    }
-    setIsToday(isTodayLog); // 오늘 로그일 경우에만 입력과 전송 활성화
-};
 
+const displayLogs = (logs: ChatLog[], isTodayLog: boolean = false) => {
+  if (isTodayLog) {
+    // 오늘 로그일 경우 sessionMessages와 todayLogs 병합 후 오래된 순서대로 정렬
+    const today = new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식으로 오늘 날짜 생성
+
+    // 오늘 날짜와 동일한 로그만 병합 및 오래된 순서로 정렬
+    const uniqueMessages = [...logs, ...sessionMessages]
+      .filter((message, index, self) => {
+        const messageDate = new Date(message.date).toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식으로 날짜 추출
+        return (
+          messageDate === today && // 오늘 날짜와 일치하는지 확인
+          index === self.findIndex((m) =>
+            m.sender === message.sender &&
+            m.message === message.message &&
+            new Date(m.date).getTime() === new Date(message.date).getTime()
+          )
+        );
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // 오래된 순서로 정렬
+
+    setChatHistory(uniqueMessages);
+  } else {
+    // 오늘이 아닌 경우 로그를 오래된 순서로 정렬하여 설정
+    const sortedLogs = logs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    setChatHistory(sortedLogs);
+  }
+  setIsToday(isTodayLog); // 오늘 로그일 경우에만 입력과 전송 활성화
+};
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -143,32 +190,37 @@ const displayLogs = (logs: ChatLog[], isTodayLog: boolean = false) => {
   // 날짜별 채팅 로그 가져오기
   const fetchChatLogs = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/chat-logs');
+      const userId = profileInfo.userId || 'unknown_user';
+      console.log("Fetching chat logs for userId:", userId); // 로그 추가
+  
+      const response = await axios.get(`http://localhost:5000/chat-logs?user_id=${userId}`);
       const data = response.data || {};
-
+  
       const today = data.today || [];
-      const last7Days = data.last_7_days || [];
-
-      const formatLogs = (logs: { question: string; response: string; timestamp: string }[]): ChatLog[] =>
-        logs.flatMap((log) => [
-          { sender: 'user', message: log.question, date: log.timestamp },
-          { sender: 'bot', message: log.response, date: log.timestamp },
-        ]);
-
-      setTodayLogs(formatLogs(today));
-
-      // 날짜별로 그룹화하여 dateGroupedLogs에 저장
-      const groupedLogs: { [date: string]: ChatLog[] } = last7Days.reduce(
-        (acc: { [date: string]: ChatLog[] }, log: { question: string; response: string; timestamp: string }) => {
-          const date = new Date(log.timestamp).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
-          if (!acc[date]) acc[date] = [];
-          acc[date].push({ sender: 'user', message: log.question, date: log.timestamp });
-          acc[date].push({ sender: 'bot', message: log.response, date: log.timestamp });
-          return acc;
-        },
-        {} as { [date: string]: ChatLog[] }
-      );
-
+      const previousDays = data.previous_days || {};
+  
+      // 로그 포맷팅 함수 정의
+      const formatLogs = (logs: { sender: string; message: string; date: string }[]): ChatLog[] =>
+        logs.map(log => ({
+          sender: log.sender,
+          message: log.message,
+          date: log.date
+        }));
+  
+      // 오늘의 로그 설정 (오래된 순서로 정렬)
+      const sortedTodayLogs = formatLogs(today).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      setTodayLogs(sortedTodayLogs);
+  
+      // 이전 날짜별 로그 설정 (오래된 순서로 정렬)
+      const groupedLogs: { [date: string]: ChatLog[] } = {};
+      for (const [date, logs] of Object.entries(previousDays)) {
+        if (Array.isArray(logs)) {
+          groupedLogs[date] = formatLogs(logs).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        } else {
+          console.error(`Unexpected format for logs on date ${date}:`, logs);
+        }
+      }
+  
       setDateGroupedLogs(groupedLogs);
     } catch (error) {
       console.error('채팅 로그를 가져오는 중 오류 발생:', error);
@@ -176,34 +228,44 @@ const displayLogs = (logs: ChatLog[], isTodayLog: boolean = false) => {
   };
 
   useEffect(() => {
-    fetchChatLogs();
-  }, []);
+    if (profileInfo.userId) {
+      fetchChatLogs();
+    }
+  }, [profileInfo.userId]);
 
   return (
     <div className={`flex h-screen ${darkMode ? 'bg-dark-mode text-light' : 'bg-light-mode text-dark'}`}>
       {/* 사이드바 */}
       <div className="sidebar-container">
-        <div className="profile-container mb-4">
+      <div className="profile-container mb-4">
           {profileInfo.name && (
-            <p className="profile-user-id">
-              {profileInfo.name}
-              <span className="small-text">님</span>
-            </p>
+            <>
+              <p className="profile-user-id">
+                {profileInfo.name}
+                <span className="small-text">님</span>
+              </p>
+              {profileInfo.departmentId && (
+                <p className="profile-department">{profileInfo.departmentName}</p>
+              )}
+            </>
           )}
 
           {/* 날짜별 로그 표시 */}
           <div className="date-log-container">
-            <ul>
-              <li onClick={() => displayLogs(todayLogs, true)} className="log-item">
-                오늘
-              </li>
-              {Object.keys(dateGroupedLogs).map((date) => (
-                <li key={date} onClick={() => displayLogs(dateGroupedLogs[date], false)} className="log-item">
-                  {date}
-                </li>
-              ))}
-            </ul>
-          </div>
+  <ul>
+    <li onClick={() => displayLogs(todayLogs, true)} className="log-item">
+      오늘
+    </li>
+    {Object.keys(dateGroupedLogs)
+      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime()) // 최신 날짜가 위로 오도록 정렬
+      .map((date) => (
+        <li key={date} onClick={() => displayLogs(dateGroupedLogs[date], false)} className="log-item">
+          {date}
+        </li>
+      ))}
+  </ul>
+</div>
+
         </div>
 
         <div className="sidebar-bottom-buttons">

@@ -69,21 +69,18 @@ html {
 
 .profile-user-id {
   font-family: 'Pretendard-Medium';
-  font-size: 24px;
+  font-size: 25px;
 }
 
 .small-text {
   font-family: 'Pretendard-Medium';
-  font-size: 18px;
-}
-
-.profile-name {
-  font-size: 1.25rem;
-  font-weight: bold;
+  font-size: 20px;
 }
 
 .profile-department {
   color: #6c757d;
+  margin-top: -14px;
+  padding-bottom: 10px;
 }
 
 .icon-spacing {
@@ -303,21 +300,6 @@ html {
   /* 다크 모드 전송 버튼 배경 */
 }
 
-/* 프로필 설정 팝업 */
-.profile-settings-container {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 300px;
-  background-color: white;
-  /* 기본 라이트 모드 */
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  padding: 16px;
-  z-index: 10;
-}
-
 .bg-dark-mode .profile-settings-container {
   background-color: #2d3748;
   /* 다크 모드 배경 */
@@ -325,26 +307,9 @@ html {
   /* 다크 모드 텍스트 색상 */
 }
 
-.profile-settings-header {
-  font-size: 1.125rem;
-  font-weight: bold;
-  margin-bottom: 16px;
+.bg-dark-mode .profile-department {
+  color: #e2e8f0;
 }
-
-/* .profile-settings-save-button {
-  width: 100%;
-  padding: 12px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  text-align: center;
-}
-
-.profile-settings-save-button:hover {
-  background-color: #0056b3;
-} */
 
 .date-log-container ul {
   list-style-type: none;

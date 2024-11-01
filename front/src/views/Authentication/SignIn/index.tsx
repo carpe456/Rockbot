@@ -43,14 +43,14 @@ export default function SignIn() {
             return;
         }
     
-        const { token, expirationTime, userId, name } = ResponseBody as SignInResponseDto;
+        const { token, expirationTime, userId, name, departmentId } = ResponseBody as SignInResponseDto;
     
         const now = new Date().getTime() * 1000;
         const expires = new Date(now + expirationTime);
     
         setCookie('accessToken', token, { expires, path: '/' });
     
-        localStorage.setItem('userInfo', JSON.stringify({ userId, token, name }));
+        localStorage.setItem('userInfo', JSON.stringify({ userId, token, name, departmentId }));
     
         setLoggedName(name);
     
@@ -60,7 +60,7 @@ export default function SignIn() {
             navigate('/auth/Admin');
         } else {
             // 일반 사용자일 경우 채팅창으로 이동
-            navigate('/auth/chat', { state: { name } });
+            navigate('/auth/chat', { state: { name, departmentId } });
         }
     };
 
