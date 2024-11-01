@@ -37,7 +37,7 @@ public class UserEntity {
         this.email = dto.getEmail();
         this.type = "app";
         this.role = "ROLE_USER";
-        this.departmentId = 1;
+        this.departmentId = 0;
     }
 
     public UserEntity(String userId, String email, String name, String type) {
@@ -47,7 +47,7 @@ public class UserEntity {
         this.email = email;
         this.type = type;
         this.role = "ROLE_USER";
-        this.departmentId = 1;
+        this.departmentId = 0;
     }
 
     // OAuth2UserServiceImplement에서 사용하는 새로운 생성자
@@ -58,7 +58,7 @@ public class UserEntity {
         this.email = email;
         this.type = type;
         this.role = "ROLE_USER"; // 기본 역할 설정
-        this.departmentId = 1;
+        this.departmentId = 0;
     }
 
     public String getUserId() {
