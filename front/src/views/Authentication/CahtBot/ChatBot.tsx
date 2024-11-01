@@ -37,6 +37,7 @@ const ChatBot: React.FC = () => {
   const [sessionMessages, setSessionMessages] = useState<ChatLog[]>([]); // 세션 동안 작성한 메시지
   const [todayLogs, setTodayLogs] = useState<ChatLog[]>([]);
   const [dateGroupedLogs, setDateGroupedLogs] = useState<{ [date: string]: ChatLog[] }>({});
+  const [activeLogDate, setActiveLogDate] = useState<string>('today'); // 현재 선택된 날짜 상태 추가
 
   // 부서 ID에 따른 부서 이름 설정 함수
   const getDepartmentName = (departmentId: number) => {
@@ -142,18 +143,20 @@ const ChatBot: React.FC = () => {
     }
 };
 
-
-const displayLogs = (logs: ChatLog[], isTodayLog: boolean = false) => {
+const displayLogs = (logs: ChatLog[], isTodayLog: boolean = false, date?: string) => {
   if (isTodayLog) {
-    // 오늘 로그일 경우 sessionMessages와 todayLogs 병합 후 오래된 순서대로 정렬
-    const today = new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식으로 오늘 날짜 생성
+    setActiveLogDate('today');
+  } else if (date) {
+    setActiveLogDate(date);
+  }
 
-    // 오늘 날짜와 동일한 로그만 병합 및 오래된 순서로 정렬
+  if (isTodayLog) {
+    const today = new Date().toISOString().split('T')[0];
     const uniqueMessages = [...logs, ...sessionMessages]
       .filter((message, index, self) => {
-        const messageDate = new Date(message.date).toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식으로 날짜 추출
+        const messageDate = new Date(message.date).toISOString().split('T')[0];
         return (
-          messageDate === today && // 오늘 날짜와 일치하는지 확인
+          messageDate === today &&
           index === self.findIndex((m) =>
             m.sender === message.sender &&
             m.message === message.message &&
@@ -161,15 +164,14 @@ const displayLogs = (logs: ChatLog[], isTodayLog: boolean = false) => {
           )
         );
       })
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // 오래된 순서로 정렬
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     setChatHistory(uniqueMessages);
   } else {
-    // 오늘이 아닌 경우 로그를 오래된 순서로 정렬하여 설정
     const sortedLogs = logs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     setChatHistory(sortedLogs);
   }
-  setIsToday(isTodayLog); // 오늘 로그일 경우에만 입력과 전송 활성화
+  setIsToday(isTodayLog);
 };
 
   useEffect(() => {
@@ -253,13 +255,20 @@ const displayLogs = (logs: ChatLog[], isTodayLog: boolean = false) => {
           {/* 날짜별 로그 표시 */}
           <div className="date-log-container">
   <ul>
-    <li onClick={() => displayLogs(todayLogs, true)} className="log-item">
+    <li
+      onClick={() => displayLogs(todayLogs, true)}
+      className={`log-item ${activeLogDate === 'today' ? 'active' : ''}`}
+    >
       오늘
     </li>
     {Object.keys(dateGroupedLogs)
-      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime()) // 최신 날짜가 위로 오도록 정렬
+      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
       .map((date) => (
-        <li key={date} onClick={() => displayLogs(dateGroupedLogs[date], false)} className="log-item">
+        <li
+          key={date}
+          onClick={() => displayLogs(dateGroupedLogs[date], false, date)}
+          className={`log-item ${activeLogDate === date ? 'active' : ''}`}
+        >
           {date}
         </li>
       ))}

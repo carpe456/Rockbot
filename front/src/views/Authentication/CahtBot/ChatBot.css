@@ -295,6 +295,10 @@ html {
   transition: background-color 0.3s ease;
 }
 
+.bg-dark-mode .log-item.active {
+  background-color: #46536b;
+}
+
 .bg-dark-mode .send-button {
   background-color: hsl(211, 100%, 35%);
   /* 다크 모드 전송 버튼 배경 */
@@ -329,7 +333,7 @@ html {
   background-color: #f0f0f0;
 }
 
-.log-item:active {
+.log-item.active {
   background-color: #ddd;
 }
 
