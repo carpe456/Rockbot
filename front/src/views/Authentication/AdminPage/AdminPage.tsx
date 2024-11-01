@@ -52,7 +52,7 @@ const AdminPage: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [cookies, , removeCookie] = useCookies(['name', 'accessToken']);
     const navigate = useNavigate();
-    const [selectedMenu, setSelectedMenu] = useState<'travelRequests' | 'users'>('travelRequests');
+    const [selectedMenu, setSelectedMenu] = useState<'travelRequests' | 'users' | 'travelList'>('travelRequests');
     const [darkMode, setDarkMode] = useState<boolean>(false);
 
     useEffect(() => {
@@ -120,21 +120,28 @@ const AdminPage: React.FC = () => {
     return (
         <div className={`flex h-screen ${darkMode ? 'bg-dark-mode text-light' : 'bg-light-mode text-dark'}`}>
           {/* 사이드바 */}
-          <div className="sidebar-container">
-            <div className="sidebar-menu">
-              <button
-                className={`menu-item ${selectedMenu === 'travelRequests' ? 'active' : ''}`}
-                onClick={() => setSelectedMenu('travelRequests')}
-              >
-                출장 결재 목록
-              </button>
-              <button
-                className={`menu-item ${selectedMenu === 'users' ? 'active' : ''}`}
-                onClick={() => setSelectedMenu('users')}
-              >
-                회원 목록
-              </button>
-            </div>
+<div className="sidebar-container">
+  <div className="sidebar-menu">
+    <button
+      className={`menu-item ${selectedMenu === 'travelList' ? 'active' : ''}`}
+      onClick={() => setSelectedMenu('travelList')}
+    >
+      출장 목록
+    </button>
+    <button
+      className={`menu-item ${selectedMenu === 'travelRequests' ? 'active' : ''}`}
+      onClick={() => setSelectedMenu('travelRequests')}
+    >
+      출장 결재 목록
+    </button>
+    <button
+      className={`menu-item ${selectedMenu === 'users' ? 'active' : ''}`}
+      onClick={() => setSelectedMenu('users')}
+    >
+      회원 목록
+    </button>
+  </div>
+
     
             <div className="sidebar-bottom-buttons">
               <button className="button dark-mode-toggle-button" onClick={toggleDarkMode}>

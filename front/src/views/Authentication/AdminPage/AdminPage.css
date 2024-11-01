@@ -50,18 +50,24 @@ html {
 }
 
 .bg-dark-mode .menu-item {
-  background-color: #4a5568;
+  background-color: hwb(219 22% 66%);
   color: #e2e8f0;
 }
 
-.menu-item.active,
-.menu-item:hover {
+.menu-item.active {
   background-color: #e2e8f0;
 }
 
-.bg-dark-mode .menu-item.active,
+.menu-item:hover {
+  background-color: #f0f0f0;
+}
+
+.bg-dark-mode .menu-item.active {
+  background-color: #46536b;
+}
+
 .bg-dark-mode .menu-item:hover {
-  background-color: #718096;
+  background-color: #4a5568;
 }
 
 .sidebar-bottom-buttons {

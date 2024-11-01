@@ -38,7 +38,7 @@ html {
   color: #000000;
 }
 
-/* 사이드바 스타일 수정 */
+/* 사이드바 스타일 */
 .sidebar-container {
   width: 360px;
   padding: 16px;
@@ -47,22 +47,93 @@ html {
   flex-direction: column;
   height: 100vh;
   box-sizing: border-box;
-  justify-content: space-between; /* 자식 요소들을 상단과 하단에 배치하도록 설정 */
+  justify-content: space-between;
   transition: background-color 0.3s ease;
-}
-
-/* 새로운 하단 버튼 컨테이너 스타일 추가 */
-.sidebar-bottom-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 14px; /* 버튼들 사이의 간격 */
 }
 
 .bg-dark-mode .sidebar-container {
   background-color: hwb(219 14% 75%);
-  /* 다크 모드일 때 어두운 배경 */
 }
 
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: auto;
+}
+
+.menu-item {
+  padding: 12px;
+  border: none;
+  background-color: #ffffff;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 16px;
+  font-family: Pretendard-Medium;
+  transition: background-color 0.3s ease;
+}
+
+.bg-dark-mode .menu-item {
+  background-color: #4a5568;
+  color: #e2e8f0;
+}
+
+.menu-item.active,
+.menu-item:hover {
+  background-color: #e2e8f0;
+}
+
+.bg-dark-mode .menu-item.active,
+.bg-dark-mode .menu-item:hover {
+  background-color: #718096;
+}
+
+/* 하단 버튼 컨테이너 스타일 */
+.sidebar-bottom-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: auto;
+}
+
+.navigate-button,
+.dark-mode-toggle-button {
+  padding: 14px 10px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  font-family: Pretendard-Medium;
+  transition: background-color 0.3s ease;
+  background-color: #007bff;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-spacing {
+  margin-right: 5px;
+}
+
+.bg-dark-mode .navigate-button,
+.bg-dark-mode .dark-mode-toggle-button {
+  background-color: #4a5568;
+  color: #e2e8f0;
+}
+
+.navigate-button:hover,
+.dark-mode-toggle-button:hover {
+  background-color: #0056b3;
+}
+
+.bg-dark-mode .navigate-button:hover,
+.bg-dark-mode .dark-mode-toggle-button:hover {
+  background-color: #2b6cb0;
+}
+
+/* 프로필 스타일 */
 .profile-container {
   text-align: center;
 }
@@ -83,22 +154,18 @@ html {
   padding-bottom: 10px;
 }
 
-.icon-spacing {
-  margin-right: 5px;
+.bg-dark-mode .profile-department {
+  color: #e2e8f0;
 }
 
-/* 대화창 */
+/* 대화창 스타일 */
 .chat-window-container {
   display: flex;
   flex-direction: column;
-  width: 1000px; /*추가부분*/
-  margin: auto; /*추가부분*/
-  /* flex-grow: 1; */
-  /* 화면의 남은 공간을 채우도록 설정 */
+  width: 1000px;
+  margin: auto;
   height: 100vh;
-  /* 채팅창도 전체 화면 높이를 차지하도록 설정 */
   box-sizing: border-box;
-  /* padding 포함한 전체 높이 계산 */
   transition: background-color 0.3s ease;
 }
 
@@ -106,22 +173,19 @@ html {
   flex-grow: 1;
   padding: 16px;
   overflow-y: auto;
-  /* 메시지가 많아지면 스크롤이 생기도록 설정 */
   background-color: hsl(0, 0%, 100%);
   transition: background-color 0.3s ease;
 }
 
 .bg-dark-mode .chat-window-container {
   background-color: #1a202c;
-  /* 다크 모드 배경 */
 }
 
 .bg-dark-mode .chat-messages-container {
-  /* background-color: #2d3748; */
   background-color: #1a202c;
-  /* 다크 모드 배경 */
 }
 
+/* 메시지 스타일 */
 .message-container {
   margin-bottom: 12px;
   transition: background-color 0.3s ease;
@@ -139,60 +203,39 @@ html {
 
 .user-message {
   text-align: right;
-  transition: background-color 0.3s ease;
 }
 
 .user-bubble {
   background-color: #007bff;
   color: #fff;
-  transition: background-color 0.3s ease;
 }
 
 .bot-message {
   text-align: left;
-  transition: background-color 0.3s ease;
 }
 
 .bot-bubble {
   background-color: #e9ecef;
   color: #000;
-  transition: background-color 0.3s ease;
 }
 
 .bg-dark-mode .bot-bubble {
   background-color: #4a5568;
-  /* 다크 모드 챗봇 메시지 */
   color: #e2e8f0;
-  /* 다크 모드 텍스트 색상 */
 }
 
 .bg-dark-mode .user-bubble {
   background-color: hsl(211, 100%, 35%);
-  /* 다크 모드 사용자 메세지 */
 }
 
-/* 입력창 */
+/* 입력창 스타일 */
 .chat-input-container {
   padding: 16px;
   border-top: 1px solid #e9ecef;
   display: flex;
   background-color: #ffffff;
-  /* 기본 라이트 모드 배경 */
   box-sizing: border-box;
-  /* padding 포함한 전체 높이 계산 */
   transition: background-color 0.3s ease;
-}
-
-.input-field {
-  font-family: 'Pretendard-Regular';
-}
-
-.bg-dark-mode .chat-input-container {
-  /* background-color: #2a3344; */
-  background-color: #1a202c;
-  /* 다크 모드 배경 */
-  border-top: 1px solid #4a5568;
-  /* 다크 모드 경계선 */
 }
 
 .input-group {
@@ -205,84 +248,34 @@ html {
   font-size: 1rem;
   border: 1px solid #ced4da;
   flex: 1;
+  font-family: 'Pretendard-Regular';
   transition: background-color 0.3s ease;
-}
-
-.input-field-password {
-  padding: 12px;
-  box-sizing: border-box;
-  font-size: 0.9rem;
-  border: 1px solid #ced4da;
-  width: 100%;
-  margin-bottom: 10px;
 }
 
 .chat-input {
   border-radius: 4px 0 0 4px;
 }
 
+.bg-dark-mode .chat-input-container {
+  background-color: #1a202c;
+  border-top: 1px solid #4a5568;
+}
+
 .bg-dark-mode .chat-input {
   background-color: #4a5568;
-  /* 다크 모드 입력 필드 배경 */
   border: 1px solid #718096;
-  /* 다크 모드 입력 필드 경계선 */
   color: #ffffff;
-  /* 다크 모드 입력 필드 텍스트 색상 */
 }
 
 /* 버튼 스타일 */
-.sidebar-container .button {
-  width: 100%;
-  padding: 14px 10px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  font-size: 15px;
-  font-family: 'Pretendard-Medium';
-}
-
 .button {
   padding: 14px 10px;
   border-radius: 8px;
   border: none;
   cursor: pointer;
-  transition: background-color 0.3s ease;
   font-size: 15px;
   font-family: 'Pretendard-Medium';
-}
-
-.profile-settings-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.mode-toggle-button,
-.dark-mode-toggle-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dark-mode-toggle-button:hover,
-.navigate-button:hover {
-  background-color: #e2e8f0;
-  /* 기본 라이트 모드 배경 */
-}
-
-.bg-dark-mode .dark-mode-toggle-button,
-.bg-dark-mode .navigate-button {
-  background-color: #4a5568;
-  /* 다크 모드 배경 */
-  color: #e2e8f0;
-  /* 다크 모드 텍스트 색상 */
-}
-
-.bg-dark-mode .dark-mode-toggle-button:hover,
-.bg-dark-mode .navigate-button:hover {
-  background-color: hwb(219 22% 66%);
-  /* 기본 라이트 모드 배경 */
+  transition: background-color 0.3s ease;
 }
 
 .send-button {
@@ -295,26 +288,11 @@ html {
   transition: background-color 0.3s ease;
 }
 
-.bg-dark-mode .log-item.active {
-  background-color: #46536b;
-}
-
 .bg-dark-mode .send-button {
   background-color: hsl(211, 100%, 35%);
-  /* 다크 모드 전송 버튼 배경 */
 }
 
-.bg-dark-mode .profile-settings-container {
-  background-color: #2d3748;
-  /* 다크 모드 배경 */
-  color: #e2e8f0;
-  /* 다크 모드 텍스트 색상 */
-}
-
-.bg-dark-mode .profile-department {
-  color: #e2e8f0;
-}
-
+/* 로그 항목 스타일 */
 .date-log-container ul {
   list-style-type: none;
   padding: 0;
@@ -327,6 +305,7 @@ html {
   margin-bottom: 4px;
   border-radius: 4px;
   text-align: center;
+  transition: background-color 0.3s ease;
 }
 
 .log-item:hover {
@@ -345,34 +324,37 @@ html {
   background-color: hwb(219 22% 66%);
 }
 
-/* 전체 스크롤바 너비 및 배경 설정 */
+.bg-dark-mode .log-item.active {
+  background-color: #46536b;
+}
+
+/* 스크롤바 스타일 */
 ::-webkit-scrollbar {
-  width: 8px; /* 스크롤바의 너비 */
+  width: 8px;
 }
 
-/* 스크롤바의 트랙 (배경) 설정 */
 ::-webkit-scrollbar-track {
-  background: #f0f0f0; /* 트랙 배경색 */
-  border-radius: 10px; /* 라운드 효과 */
-}
-
-/* 스크롤바의 이동 가능한 부분 (손잡이) 설정 */
-::-webkit-scrollbar-thumb {
-  background: hsl(0, 0%, 87%); /* 스크롤바 색상 */
-  border-radius: 10px; /* 라운드 효과 */
-}
-
-/* 스크롤바 위에 커서를 올렸을 때 색상 */
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(215, 23%, 84%); /* 호버 시 스크롤바 색상 */
+  background: #f0f0f0;
+  border-radius: 10px;
 }
 
 .bg-dark-mode ::-webkit-scrollbar-track {
   background: #4a5568;
 }
 
-/* 스크롤바의 이동 가능한 부분 (손잡이) 설정 */
+::-webkit-scrollbar-thumb {
+  background: hsl(0, 0%, 87%);
+  border-radius: 10px;
+}
+
 .bg-dark-mode ::-webkit-scrollbar-thumb {
-  background: #888; /* 스크롤바 색상 */
-  border-radius: 10px; /* 라운드 효과 */
+  background: #888;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(215, 23%, 84%);
+}
+
+.bg-dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: #b3b3b3;
 }
