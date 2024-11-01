@@ -77,8 +77,9 @@ const ChatBot: React.FC = () => {
   }, [cookies, loc]);
 
   useEffect(() => {
-    setChatHistory([{ sender: 'bot', message: `${profileInfo.name}님 무엇을 도와드릴까요?`, date: '' }]);
+    setChatHistory([{ sender: 'bot', message: `${profileInfo.name}님 무엇을 도와드릴까요?`, date: new Date().toISOString() }]);
   }, [profileInfo]);
+  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuestion(e.target.value);
@@ -152,15 +153,21 @@ const displayLogs = (logs: ChatLog[], isTodayLog: boolean = false, date?: string
 
   if (isTodayLog) {
     const today = new Date().toISOString().split('T')[0];
-    const uniqueMessages = [...logs, ...sessionMessages]
+    const uniqueMessages = [
+      { sender: 'bot', message: `${profileInfo.name}님 무엇을 도와드릴까요?`, date: '' }, // 날짜가 없는 경우 예외 처리 필요
+      ...logs,
+      ...sessionMessages,
+    ]
       .filter((message, index, self) => {
+        if (!message.date) return true; // 날짜가 없는 경우 필터링하지 않음
         const messageDate = new Date(message.date).toISOString().split('T')[0];
         return (
           messageDate === today &&
-          index === self.findIndex((m) =>
-            m.sender === message.sender &&
-            m.message === message.message &&
-            new Date(m.date).getTime() === new Date(message.date).getTime()
+          index === self.findIndex(
+            (m) =>
+              m.sender === message.sender &&
+              m.message === message.message &&
+              new Date(m.date).getTime() === new Date(message.date).getTime()
           )
         );
       })
@@ -169,7 +176,10 @@ const displayLogs = (logs: ChatLog[], isTodayLog: boolean = false, date?: string
     setChatHistory(uniqueMessages);
   } else {
     const sortedLogs = logs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    setChatHistory(sortedLogs);
+    setChatHistory([
+      { sender: 'bot', message: `${profileInfo.name}님 무엇을 도와드릴까요?`, date: '' }, // 날짜가 없는 경우 예외 처리 필요
+      ...sortedLogs,
+    ]);
   }
   setIsToday(isTodayLog);
 };
