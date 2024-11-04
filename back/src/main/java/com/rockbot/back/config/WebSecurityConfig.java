@@ -48,8 +48,10 @@ public class WebSecurityConfig {
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(request -> request
                                                 .requestMatchers(HttpMethod.PUT, "/api/v1/user/*/department")
-                                                .hasRole("ADMIN") // 부서 변경은 ADMIN만
-                                                .requestMatchers("/", "/api/v1/auth/**", "/oauth2/**").permitAll()
+                                                .hasRole("ADMIN")
+                                                .requestMatchers("/", "/api/v1/auth/**", "/api/v1/auth/travel-requests",
+                                                                "/oauth2/**")
+                                                .permitAll()
                                                 .requestMatchers("/api/v1/user/**").hasAnyRole("USER", "ADMIN")
                                                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())

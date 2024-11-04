@@ -11,12 +11,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "travel_requests")
+@Table(name = "travel_request")
 public class TravelEntity {
 
     @Id
@@ -43,7 +44,7 @@ public class TravelEntity {
     private String status;
 
     @Column(name = "submission_date")
-    private LocalDate submissionDate;
+    private LocalDateTime submissionDate;
 
     private String name;
 }

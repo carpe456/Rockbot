@@ -2,6 +2,7 @@ package com.rockbot.back.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,9 @@ import com.rockbot.back.dto.response.auth.EmailCertificationResponseDto;
 import com.rockbot.back.dto.response.auth.IdCheckResponseDto;
 import com.rockbot.back.dto.response.auth.SignInResponseDto;
 import com.rockbot.back.dto.response.auth.SignUpResponseDto;
+import com.rockbot.back.entity.TravelEntity;
 import com.rockbot.back.entity.UserEntity;
+import com.rockbot.back.repository.TravelRequestRepository;
 import com.rockbot.back.repository.UserRepository;
 import com.rockbot.back.service.AuthService;
 
@@ -39,6 +42,9 @@ public class AuthController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TravelRequestRepository travelRequestRepository;
 
     @PostMapping("/id-check")
     public ResponseEntity<? super IdCheckResponseDto> idCheck(
@@ -81,6 +87,7 @@ public class AuthController {
         return userRepository.findAll();
     }
 
+    // 부서 변경
     @PutMapping("/{userId}/department")
     public ResponseEntity<String> updateDepartment(@PathVariable String userId,
             @RequestBody Map<String, Integer> request) {
@@ -98,4 +105,31 @@ public class AuthController {
 
         return ResponseEntity.ok("부서가 업데이트되었습니다.");
     }
+
+    // 모든 출장 요청 목록 가져오기
+    @GetMapping("/travel-requests")
+    public ResponseEntity<List<TravelEntity>> getAllTravelRequests() {
+        List<TravelEntity> travelRequests = travelRequestRepository.findAll();
+        return ResponseEntity.ok(travelRequests);
+    }
+
+    // 특정 출장 요청의 상태 업데이트
+    @PutMapping("/travel-requests/{requestId}/status")
+    public ResponseEntity<String> updateTravelRequestStatus(
+            @PathVariable Long requestId,
+            @RequestBody Map<String, String> request) {
+        Optional<TravelEntity> travelRequestOptional = travelRequestRepository.findById(requestId);
+
+        if (!travelRequestOptional.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String newStatus = request.get("status");
+        TravelEntity travelRequest = travelRequestOptional.get();
+        travelRequest.setStatus(newStatus);
+        travelRequestRepository.save(travelRequest);
+
+        return ResponseEntity.ok("출장 요청 상태가 업데이트되었습니다.");
+    }
+
 }

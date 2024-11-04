@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
-import { Unlock, Moon, Sun, Send } from 'lucide-react';
+import { Unlock, Moon, Sun } from 'lucide-react';
 import axios from 'axios';
 import './AdminPage.css';
 
@@ -12,66 +12,83 @@ interface User {
 }
 
 interface TravelRequest {
-    request_id: number;
+    requestId: number;
     name: string;
-    department_id: number;
+    departmentId: number;
     destination: string;
-    travel_date: string;
-    return_date: string;
+    travelDate: string;
+    returnDate: string;
     reason: string;
     status: 'Pending' | 'Approved' | 'Rejected';
-    submission_date: string;
+    submissionDate: string;
 }
 
-    // 부서 ID에 따른 부서 이름 설정 함수
-    const getDepartmentName = (departmentId: number) => {
-        switch (departmentId) {
-            case 1:
-                return '임시부서';
-            case 2:
-                return '인사부서';
-            case 3:
-                return '편성부서';
-            case 4:
-                return '제작부서';
-            default:
-                return '알 수 없음';
-        }
-    };
+// 부서 ID에 따른 부서 이름 설정 함수
+const getDepartmentName = (departmentId: number) => {
+    switch (departmentId) {
+        case 1:
+            return '임시부서';
+        case 2:
+            return '인사부서';
+        case 3:
+            return '편성부서';
+        case 4:
+            return '제작부서';
+        default:
+            return '알 수 없음';
+    }
+};
+
+// 날짜 변환
+const formatDate = (dateString: string) => {
+    if (!dateString) return "날짜 정보 없음";
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) throw new Error("유효하지 않은 날짜 형식");
+
+        const formatter = new Intl.DateTimeFormat('ko-KR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric'
+        });
+        return formatter.format(date);
+    } catch (error) {
+        console.error("날짜 변환 오류:", error);
+        return "유효하지 않은 날짜";
+    }
+};
 
 const AdminPage: React.FC = () => {
-    const [travelRequests, setTravelRequests] = useState<TravelRequest[]>([
-        {
-            request_id: 1,
-            name: 'user123',
-            department_id: 1,
-            destination: '서울',
-            travel_date: '2024-11-01',
-            return_date: '2024-11-05',
-            reason: '고객사 미팅',
-            status: 'Pending',
-            submission_date: '2024-10-20',
-        },
-        {
-            request_id: 2,
-            name: 'user456',
-            department_id: 2,
-            destination: '부산',
-            travel_date: '2024-11-10',
-            return_date: '2024-11-12',
-            reason: '지사 방문',
-            status: 'Pending',
-            submission_date: '2024-10-22',
-        },
-    ]);
-
+    const [travelRequests, setTravelRequests] = useState<TravelRequest[]>([]);
     const [users, setUsers] = useState<User[]>([]);
     const [cookies, , removeCookie] = useCookies(['name', 'accessToken']);
     const navigate = useNavigate();
     const [selectedMenu, setSelectedMenu] = useState<'travelList' | 'travelRequests' | 'users'>('travelList');
     const [darkMode, setDarkMode] = useState<boolean>(false);
 
+    // 출장 목록과 출장 결재 목록에 맞게 요청 필터링
+    const approvedRequests = travelRequests.filter(request => request.status === 'Approved');
+    const pendingRequests = travelRequests.filter(request => request.status === 'Pending');
+
     useEffect(() => {
+
+        const fetchTravelRequests = async () => {
+            try {
+                const response = await axios.get('http://localhost:4040/api/v1/auth/travel-requests', {
+                    headers: {
+                        Authorization: `Bearer ${cookies.accessToken}`,
+                    },
+                });
+                console.log('Fetched travel requests:', response.data);
+                setTravelRequests(response.data);
+            } catch (error) {
+                console.error('출장 요청 목록을 가져오는 중 오류 발생:', error);
+            }
+        };
+
         const fetchUsers = async () => {
             try {
                 const response = await axios.get('http://localhost:4040/api/v1/auth/all', {
@@ -79,30 +96,56 @@ const AdminPage: React.FC = () => {
                         Authorization: `Bearer ${cookies.accessToken}`,
                     },
                 });
-                console.log('회원 정보:', response.data);
                 setUsers(response.data);
             } catch (error) {
                 console.error('회원 정보를 가져오는 중 오류 발생:', error);
             }
         };
 
+        fetchTravelRequests();
         fetchUsers();
-    }, []);
+    }, [cookies.accessToken]);
 
-    const handleApprove = (id: number) => {
-        setTravelRequests((prevRequests) =>
-            prevRequests.map((request) =>
-                request.request_id === id ? { ...request, status: 'Approved' } : request
-            )
-        );
+    const handleApprove = async (id: number) => {
+        try {
+            await axios.put(
+                `http://localhost:4040/api/v1/auth/travel-requests/${id}/status`,
+                { status: 'Approved' },
+                {
+                    headers: {
+                        Authorization: `Bearer ${cookies.accessToken}`,
+                    },
+                }
+            );
+            setTravelRequests((prevRequests) =>
+                prevRequests.map((request) =>
+                    request.requestId === id ? { ...request, status: 'Approved' } : request
+                )
+            );
+        } catch (error) {
+            console.error('출장 요청 승인 중 오류 발생:', error);
+        }
     };
 
-    const handleReject = (id: number) => {
-        setTravelRequests((prevRequests) =>
-            prevRequests.map((request) =>
-                request.request_id === id ? { ...request, status: 'Rejected' } : request
-            )
-        );
+    const handleReject = async (id: number) => {
+        try {
+            await axios.put(
+                `http://localhost:4040/api/v1/auth/travel-requests/${id}/status`,
+                { status: 'Rejected' },
+                {
+                    headers: {
+                        Authorization: `Bearer ${cookies.accessToken}`,
+                    },
+                }
+            );
+            setTravelRequests((prevRequests) =>
+                prevRequests.map((request) =>
+                    request.requestId === id ? { ...request, status: 'Rejected' } : request
+                )
+            );
+        } catch (error) {
+            console.error('출장 요청 거절 중 오류 발생:', error);
+        }
     };
 
     const handleLogout = () => {
@@ -119,8 +162,8 @@ const AdminPage: React.FC = () => {
                 alert("로그인이 필요합니다.");
                 return;
             }
-    
-            const response = await axios.put(
+
+            await axios.put(
                 `http://localhost:4040/api/v1/user/${userId}/department`,
                 { departmentId: newDepartmentId },
                 {
@@ -129,7 +172,6 @@ const AdminPage: React.FC = () => {
                     },
                 }
             );
-            console.log("부서 변경 응답:", response.data);
             setUsers((prevUsers) =>
                 prevUsers.map((user) =>
                     user.userId === userId ? { ...user, departmentId: newDepartmentId } : user
@@ -140,8 +182,8 @@ const AdminPage: React.FC = () => {
             console.error("부서 변경 중 오류 발생:", error);
             alert("부서 변경에 실패했습니다.");
         }
-    };    
-    
+    };
+
     const toggleDarkMode = () => {
         setDarkMode(!darkMode);
     };
@@ -185,16 +227,17 @@ const AdminPage: React.FC = () => {
             {/* 출장 목록 */}
             {selectedMenu === 'travelList' && (
                 <div className="travel-list-container">
-                    {travelRequests.map((request) => (
-                        <div key={request.request_id} className="trip-item">
+                    {approvedRequests.map((request) => (
+                        <div key={request.requestId} className="trip-item">
                             <div className="trip-info">
                                 <p className="trip-name">이름 : {request.name}</p>
-                                <p className="trip-department">부서 ID : {request.department_id}</p>
+                                <p className="trip-department">부서 ID : {getDepartmentName(request.departmentId)}</p>
                                 <p className="trip-destination">목적지 : {request.destination}</p>
                                 <p className="trip-dates">
-                                    출장 날짜 : {request.travel_date} - {request.return_date}
+                                    출장 날짜 : {formatDate(request.travelDate)} - {formatDate(request.returnDate)}
                                 </p>
                                 <p className="trip-reason">사유 : {request.reason}</p>
+                                <p className="trip-submission-date">신청 날짜 : {formatDate(request.submissionDate)}</p>
                             </div>
                         </div>
                     ))}
@@ -203,33 +246,30 @@ const AdminPage: React.FC = () => {
 
             {selectedMenu === 'travelRequests' && (
                 <div className="request-list-container">
-                    {travelRequests.map((request) => (
-                        <div key={request.request_id} className={`trip-request ${request.status.toLowerCase()}`}>
+                    {pendingRequests.map((request) => (
+                        <div key={request.requestId} className={`trip-request ${request.status.toLowerCase()}`}>
                             <div className="trip-info">
                                 <p className="trip-name">이름 : {request.name}</p>
-                                <p className="trip-department">부서 : {request.department_id}</p>
+                                <p className="trip-department">부서 : {getDepartmentName(request.departmentId)}</p>
                                 <p className="trip-destination">목적지 : {request.destination}</p>
                                 <p className="trip-dates">
-                                    출장 날짜 : {request.travel_date} - {request.return_date}
+                                    출장 날짜 : {request.travelDate} - {request.returnDate}
                                 </p>
                                 <p className="trip-reason">사유 : {request.reason}</p>
-                                <p className="trip-submission-date">신청 날짜 : {request.submission_date}</p>
+                                <p className="trip-submission-date">신청 날짜 : {formatDate(request.submissionDate)}</p>
                             </div>
-                            {request.status === 'Pending' && (
-                                <div className="trip-actions">
-                                    <button className="approve-button" onClick={() => handleApprove(request.request_id)}>
-                                        ✔ 승인
-                                    </button>
-                                    <button className="reject-button" onClick={() => handleReject(request.request_id)}>
-                                        ✖ 거절
-                                    </button>
-                                </div>
-                            )}
+                            <div className="trip-actions">
+                                <button className="approve-button" onClick={() => handleApprove(request.requestId)}>
+                                    ✔ 승인
+                                </button>
+                                <button className="reject-button" onClick={() => handleReject(request.requestId)}>
+                                    ✖ 거절
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>
             )}
-
             {selectedMenu === 'users' && (
                 <div className="user-list-container">
                     {users.map((user) => (
@@ -249,7 +289,6 @@ const AdminPage: React.FC = () => {
                                     <option value={4}>제작부서</option>
                                 </select>
                             </label>
-
                         </div>
                     ))}
                 </div>
