@@ -57,7 +57,7 @@ export default function SignIn() {
         // 로그인 후 조건에 따라 페이지 이동
         if (userId === 'Admin') {
             // Admin 사용자인 경우 관리 페이지로 이동
-            navigate('/auth/Admin');
+            navigate('/auth/admin');
         } else {
             // 일반 사용자일 경우 채팅창으로 이동
             navigate('/auth/chat', { state: { name, departmentId } });

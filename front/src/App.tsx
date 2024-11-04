@@ -16,7 +16,7 @@ function App() {
         <Route path='sign-up' element={<SignUp />} />
         <Route path='sign-in' element={<SignIn />} />
         <Route path='chat' element={<ChatBot />} />
-        <Route path='Admin' element={<Admin />} />
+        <Route path='admin' element={<Admin />} />
         <Route path='oauth-response/:token/:expirationTime' element={<OAuth />} />
         
         </Route>

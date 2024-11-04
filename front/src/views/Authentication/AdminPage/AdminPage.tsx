@@ -21,6 +21,7 @@ interface TravelRequest {
     reason: string;
     status: 'Pending' | 'Approved' | 'Rejected';
     submissionDate: string;
+    fadingOut?: boolean;
 }
 
 // 부서 ID에 따른 부서 이름 설정 함수
@@ -66,12 +67,25 @@ const AdminPage: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [cookies, , removeCookie] = useCookies(['name', 'accessToken']);
     const navigate = useNavigate();
-    const [selectedMenu, setSelectedMenu] = useState<'travelList' | 'travelRequests' | 'users'>('travelList');
+    const [selectedMenu, setSelectedMenu] = useState<'travelList' | 'travelPending' | 'travelRequests' | 'users'>('travelList');
     const [darkMode, setDarkMode] = useState<boolean>(false);
 
-    // 출장 목록과 출장 결재 목록에 맞게 요청 필터링
-    const approvedRequests = travelRequests.filter(request => request.status === 'Approved');
+    const approvedRequests = travelRequests.filter(
+        request => request.status === 'Approved' && new Date(request.returnDate) >= new Date()
+    );
+
+    const rejectedRequests = travelRequests.filter(request => request.status === 'Rejected');
     const pendingRequests = travelRequests.filter(request => request.status === 'Pending');
+
+    // 복귀일까지 남은 일 수 계산 함수
+    const calculateDaysUntilReturn = (returnDate: string) => {
+        const today = new Date();
+        const returnDay = new Date(returnDate);
+        const timeDifference = returnDay.getTime() - today.getTime();
+        const daysUntilReturn = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
+
+        return daysUntilReturn > 0 ? `${daysUntilReturn}일 전` : '오늘 복귀 예정';
+    };
 
     useEffect(() => {
 
@@ -117,11 +131,19 @@ const AdminPage: React.FC = () => {
                     },
                 }
             );
+
+            // fade-out 클래스를 추가하고 3초 후 항목 삭제
             setTravelRequests((prevRequests) =>
                 prevRequests.map((request) =>
-                    request.requestId === id ? { ...request, status: 'Approved' } : request
+                    request.requestId === id ? { ...request, status: 'Approved', fadingOut: true } : request
                 )
             );
+
+            setTimeout(() => {
+                setTravelRequests((prevRequests) =>
+                    prevRequests.filter((request) => request.requestId !== id)
+                );
+            }, 3000);
         } catch (error) {
             console.error('출장 요청 승인 중 오류 발생:', error);
         }
@@ -138,11 +160,19 @@ const AdminPage: React.FC = () => {
                     },
                 }
             );
+
+            // fade-out 클래스를 추가하고 3초 후 항목 삭제
             setTravelRequests((prevRequests) =>
                 prevRequests.map((request) =>
-                    request.requestId === id ? { ...request, status: 'Rejected' } : request
+                    request.requestId === id ? { ...request, status: 'Rejected', fadingOut: true } : request
                 )
             );
+
+            setTimeout(() => {
+                setTravelRequests((prevRequests) =>
+                    prevRequests.filter((request) => request.requestId !== id)
+                );
+            }, 3000);
         } catch (error) {
             console.error('출장 요청 거절 중 오류 발생:', error);
         }
@@ -158,20 +188,29 @@ const AdminPage: React.FC = () => {
     const handleDepartmentChange = async (userId: string, newDepartmentId: number) => {
         try {
             const token = cookies.accessToken;
+    
+            console.log("User ID:", userId);
+            console.log("New Department ID:", newDepartmentId);
+    
             if (!token) {
                 alert("로그인이 필요합니다.");
                 return;
             }
-
+    
+            console.log("Sending request with User ID:", userId, "and Department ID:", newDepartmentId);
+    
+            // 백엔드 서버로 PUT 요청을 보내 부서 ID를 변경
             await axios.put(
-                `http://localhost:4040/api/v1/user/${userId}/department`,
+                `http://localhost:4040/api/v1/auth/${userId}/department`, // 여기에 userId를 포함합니다
                 { departmentId: newDepartmentId },
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`,
+                        Authorization: `Bearer ${token}`, // 인증 토큰을 포함합니다
                     },
                 }
             );
+    
+            // 부서 변경 후 프론트엔드 상태 업데이트
             setUsers((prevUsers) =>
                 prevUsers.map((user) =>
                     user.userId === userId ? { ...user, departmentId: newDepartmentId } : user
@@ -182,7 +221,7 @@ const AdminPage: React.FC = () => {
             console.error("부서 변경 중 오류 발생:", error);
             alert("부서 변경에 실패했습니다.");
         }
-    };
+    };    
 
     const toggleDarkMode = () => {
         setDarkMode(!darkMode);
@@ -198,6 +237,12 @@ const AdminPage: React.FC = () => {
                         onClick={() => setSelectedMenu('travelList')}
                     >
                         출장 목록
+                    </button>
+                    <button
+                        className={`menu-item ${selectedMenu === 'travelPending' ? 'active' : ''}`}
+                        onClick={() => setSelectedMenu('travelPending')}
+                    >
+                        출장 결재 대기
                     </button>
                     <button
                         className={`menu-item ${selectedMenu === 'travelRequests' ? 'active' : ''}`}
@@ -224,36 +269,16 @@ const AdminPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* 출장 목록 */}
-            {selectedMenu === 'travelList' && (
-                <div className="travel-list-container">
-                    {approvedRequests.map((request) => (
-                        <div key={request.requestId} className="trip-item">
-                            <div className="trip-info">
-                                <p className="trip-name">이름 : {request.name}</p>
-                                <p className="trip-department">부서 ID : {getDepartmentName(request.departmentId)}</p>
-                                <p className="trip-destination">목적지 : {request.destination}</p>
-                                <p className="trip-dates">
-                                    출장 날짜 : {formatDate(request.travelDate)} - {formatDate(request.returnDate)}
-                                </p>
-                                <p className="trip-reason">사유 : {request.reason}</p>
-                                <p className="trip-submission-date">신청 날짜 : {formatDate(request.submissionDate)}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {selectedMenu === 'travelRequests' && (
-                <div className="request-list-container">
+            {selectedMenu === 'travelPending' && (
+                <div className="pending-list-container">
                     {pendingRequests.map((request) => (
-                        <div key={request.requestId} className={`trip-request ${request.status.toLowerCase()}`}>
+                        <div key={request.requestId} className="trip-request">
                             <div className="trip-info">
                                 <p className="trip-name">이름 : {request.name}</p>
                                 <p className="trip-department">부서 : {getDepartmentName(request.departmentId)}</p>
                                 <p className="trip-destination">목적지 : {request.destination}</p>
                                 <p className="trip-dates">
-                                    출장 날짜 : {request.travelDate} - {request.returnDate}
+                                    출장 날짜 : {formatDate(request.travelDate)} ~ {formatDate(request.returnDate)}까지
                                 </p>
                                 <p className="trip-reason">사유 : {request.reason}</p>
                                 <p className="trip-submission-date">신청 날짜 : {formatDate(request.submissionDate)}</p>
@@ -270,25 +295,83 @@ const AdminPage: React.FC = () => {
                     ))}
                 </div>
             )}
+
+            {/* 출장 목록 */}
+            {selectedMenu === 'travelList' && (
+                <div className="travel-list-container">
+                    {approvedRequests.map((request) => (
+                        <div key={request.requestId} className="trip-item">
+                            <div className="trip-info">
+                                <p className="trip-name">이름 : {request.name}</p>
+                                <p className="trip-department">부서 ID : {getDepartmentName(request.departmentId)}</p>
+                                <p className="trip-destination">목적지 : {request.destination}</p>
+                                <p className="trip-dates">
+                                    출장 날짜 : {formatDate(request.travelDate)} ~ {formatDate(request.returnDate)}까지
+                                </p>
+                                <p className="trip-reason">사유 : {request.reason}</p>
+                                <p className="trip-submission-date">신청 날짜 : {formatDate(request.submissionDate)}</p>
+                                <p className="trip-return-days"> ＊복귀 {calculateDaysUntilReturn(request.returnDate)}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {selectedMenu === 'travelRequests' && (
+                <div className="request-list-container">
+                    {approvedRequests.map((request) => (
+                        <div key={request.requestId} className="trip-request approved">
+                            <div className="trip-info">
+                                <p className="trip-name">이름 : {request.name}</p>
+                                <p className="trip-department">부서 : {getDepartmentName(request.departmentId)}</p>
+                                <p className="trip-destination">목적지 : {request.destination}</p>
+                                <p className="trip-dates">
+                                    출장 날짜 : {formatDate(request.travelDate)} ~ {formatDate(request.returnDate)}까지
+                                </p>
+                                <p className="trip-reason">사유 : {request.reason}</p>
+                                <p className="trip-submission-date">신청 날짜 : {formatDate(request.submissionDate)}</p>
+                                <p className="trip-status">＊승인됨</p>
+                            </div>
+                        </div>
+                    ))}
+                    {rejectedRequests.map((request) => (
+                        <div key={request.requestId} className="trip-request rejected">
+                            <div className="trip-info">
+                                <p className="trip-name">이름 : {request.name}</p>
+                                <p className="trip-department">부서 : {getDepartmentName(request.departmentId)}</p>
+                                <p className="trip-destination">목적지 : {request.destination}</p>
+                                <p className="trip-dates">
+                                    출장 날짜 : {formatDate(request.travelDate)} ~ {formatDate(request.returnDate)}까지
+                                </p>
+                                <p className="trip-reason">사유 : {request.reason}</p>
+                                <p className="trip-submission-date">신청 날짜 : {formatDate(request.submissionDate)}</p>
+                                <p className="trip-status">＊거절됨</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
             {selectedMenu === 'users' && (
                 <div className="user-list-container">
-                    {users.map((user) => (
+                     {users
+            .filter((user) => user.userId !== 'Admin') // 관리자 계정 제외
+            .map((user) =>  (
                         <div key={user.userId} className="user-info">
                             <p>이름 : {user.name}</p>
                             <p>부서 : {getDepartmentName(user.departmentId)}</p>
                             <label>
-                                부서 변경
-                                <select
-                                    className="custom-select"
-                                    value={user.departmentId}
-                                    onChange={(e) => handleDepartmentChange(user.userId, parseInt(e.target.value))}
-                                >
-                                    <option value={1}>임시부서</option>
-                                    <option value={2}>인사부서</option>
-                                    <option value={3}>편성부서</option>
-                                    <option value={4}>제작부서</option>
-                                </select>
-                            </label>
+                                부서 변경</label>
+                            <select
+                                className="custom-select"
+                                value={user.departmentId}
+                                onChange={(e) => handleDepartmentChange(user.userId, parseInt(e.target.value))}
+                            >
+                                <option value={1}>임시부서</option>
+                                <option value={2}>인사부서</option>
+                                <option value={3}>편성부서</option>
+                                <option value={4}>제작부서</option>
+                            </select>
                         </div>
                     ))}
                 </div>

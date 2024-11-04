@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -87,23 +88,23 @@ public class AuthController {
         return userRepository.findAll();
     }
 
-    // 부서 변경
+    // 부서 변경 엔드포인트
     @PutMapping("/{userId}/department")
-    public ResponseEntity<String> updateDepartment(@PathVariable String userId,
+    public ResponseEntity<?> updateUserDepartment(@PathVariable String userId,
             @RequestBody Map<String, Integer> request) {
-        int newDepartmentId = request.get("departmentId");
+        try {
+            Integer newDepartmentId = request.get("departmentId");
+            UserEntity user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        // 사용자 ID로 사용자 검색
-        UserEntity user = userRepository.findByUserId(userId);
-        if (user == null) {
-            return ResponseEntity.notFound().build();
+            // 부서 ID 업데이트
+            user.setDepartmentId(newDepartmentId);
+            userRepository.save(user);
+
+            return ResponseEntity.ok("부서가 성공적으로 변경되었습니다.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("부서 변경에 실패했습니다.");
         }
-
-        // 부서 ID 업데이트
-        user.setDepartmentId(newDepartmentId);
-        userRepository.save(user);
-
-        return ResponseEntity.ok("부서가 업데이트되었습니다.");
     }
 
     // 모든 출장 요청 목록 가져오기

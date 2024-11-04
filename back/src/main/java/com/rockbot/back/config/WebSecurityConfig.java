@@ -49,12 +49,13 @@ public class WebSecurityConfig {
                                 .authorizeHttpRequests(request -> request
                                                 .requestMatchers(HttpMethod.PUT, "/api/v1/user/*/department")
                                                 .hasRole("ADMIN")
+                                                .requestMatchers("/api/v1/user/**").hasAnyRole("USER", "ADMIN")
                                                 .requestMatchers("/", "/api/v1/auth/**", "/api/v1/auth/travel-requests",
                                                                 "/oauth2/**")
                                                 .permitAll()
-                                                .requestMatchers("/api/v1/user/**").hasAnyRole("USER", "ADMIN")
                                                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())
+
                                 .oauth2Login(oauth2 -> oauth2
                                                 .authorizationEndpoint(
                                                                 endpoint -> endpoint.baseUri("/api/v1/auth/oauth2"))
