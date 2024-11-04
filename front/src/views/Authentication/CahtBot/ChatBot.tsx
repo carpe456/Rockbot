@@ -42,13 +42,13 @@ const ChatBot: React.FC = () => {
   // 부서 ID에 따른 부서 이름 설정 함수
   const getDepartmentName = (departmentId: number) => {
     switch (departmentId) {
-      case 0:
-        return '임시부서';
       case 1:
-        return '인사부서';
+        return '임시부서';
       case 2:
-        return '편성부서';
+        return '인사부서';
       case 3:
+        return '편성부서';
+      case 4:
         return '제작부서';
       default:
         return '알 수 없음';

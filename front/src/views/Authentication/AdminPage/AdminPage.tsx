@@ -74,7 +74,7 @@ const AdminPage: React.FC = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get('http://localhost:4040/api/v1/user/all', {
+                const response = await axios.get('http://localhost:4040/api/v1/auth/all', {
                     headers: {
                         Authorization: `Bearer ${cookies.accessToken}`,
                     },

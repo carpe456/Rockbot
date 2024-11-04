@@ -39,14 +39,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
 
             String token = parseBearerToken(request);
-            
+
             if (token == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
             String userId = jwtProvider.validate(token);
-            
+
             if (userId == null) {
                 filterChain.doFilter(request, response);
                 return;
@@ -54,8 +54,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             UserEntity userEntity = userRepository.findByUserId(userId);
             String role = userEntity.getRole(); // role : ROLE_USER, ROLE_ADMIN
-            System.out.println(role+"이거 왜 3");
-            
+            System.out.println(role + "이거 왜 3");
+
             List<GrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority(role));
 
