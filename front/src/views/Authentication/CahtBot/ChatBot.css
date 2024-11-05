@@ -51,6 +51,10 @@ html {
   transition: background-color 0.3s ease;
 }
 
+.notification-count {
+  margin-left: 3px;
+}
+
 .bg-dark-mode .sidebar-container {
   background-color: hwb(219 14% 75%);
 }

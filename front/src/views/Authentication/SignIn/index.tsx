@@ -45,11 +45,14 @@ export default function SignIn() {
     
         const { token, expirationTime, userId, name, departmentId } = ResponseBody as SignInResponseDto;
     
-        const now = new Date().getTime() * 1000;
-        const expires = new Date(now + expirationTime);
+        const now = new Date().getTime();
+        const expires = new Date(now + expirationTime * 1000);
     
+        // accessToken과 userId를 쿠키에 저장
         setCookie('accessToken', token, { expires, path: '/' });
+        setCookie('userId', userId, { expires, path: '/' });
     
+        // userInfo는 localStorage에 저장
         localStorage.setItem('userInfo', JSON.stringify({ userId, token, name, departmentId }));
     
         setLoggedName(name);
@@ -62,7 +65,7 @@ export default function SignIn() {
             // 일반 사용자일 경우 채팅창으로 이동
             navigate('/auth/chat', { state: { name, departmentId } });
         }
-    };
+    };    
 
     useEffect(() => {
         const storedUserInfo = localStorage.getItem('userInfo');

@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.management.Notification;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.rockbot.back.dto.request.auth.CheckCertificationRequestDto;
 import com.rockbot.back.dto.request.auth.EmailCertificationRequestDto;
 import com.rockbot.back.dto.request.auth.IdCheckRequestDto;
+import com.rockbot.back.dto.request.auth.NotificationRequestDto;
 import com.rockbot.back.dto.request.auth.SignInRequestDto;
 import com.rockbot.back.dto.request.auth.SignUpRequestDto;
 import com.rockbot.back.dto.response.auth.CheckCertificationResponseDto;
@@ -25,8 +28,10 @@ import com.rockbot.back.dto.response.auth.EmailCertificationResponseDto;
 import com.rockbot.back.dto.response.auth.IdCheckResponseDto;
 import com.rockbot.back.dto.response.auth.SignInResponseDto;
 import com.rockbot.back.dto.response.auth.SignUpResponseDto;
+import com.rockbot.back.entity.NotificationEntity; // 올바른 Notification 엔터티 임포트
 import com.rockbot.back.entity.TravelEntity;
 import com.rockbot.back.entity.UserEntity;
+import com.rockbot.back.repository.NotificationRepository;
 import com.rockbot.back.repository.TravelRequestRepository;
 import com.rockbot.back.repository.UserRepository;
 import com.rockbot.back.service.AuthService;
@@ -46,6 +51,9 @@ public class AuthController {
 
     @Autowired
     private TravelRequestRepository travelRequestRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @PostMapping("/id-check")
     public ResponseEntity<? super IdCheckResponseDto> idCheck(
@@ -133,4 +141,46 @@ public class AuthController {
         return ResponseEntity.ok("출장 요청 상태가 업데이트되었습니다.");
     }
 
+    @PostMapping("/notifications")
+    public ResponseEntity<?> createNotification(@RequestBody NotificationRequestDto notificationRequest) {
+        try {
+            NotificationEntity notification = new NotificationEntity();
+            notification.setUserId(notificationRequest.getUserId());
+            notification.setMessage(notificationRequest.getMessage());
+            notification.setStatus("Unread");
+            notificationRepository.save(notification);
+
+            return ResponseEntity.ok("알림이 저장되었습니다.");
+        } catch (Exception e) {
+            e.printStackTrace(); // 오류 로그 출력
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("알림 저장 중 오류 발생");
+        }
+    }
+
+    @GetMapping("/notifications/{userId}")
+    public ResponseEntity<List<NotificationEntity>> getUnreadNotifications(@PathVariable String userId) {
+        try {
+            List<NotificationEntity> notifications = notificationRepository.findByUserIdAndStatus(userId, "Unread");
+            return ResponseEntity.ok(notifications);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @PutMapping("/notifications/{notificationId}")
+    public ResponseEntity<?> markNotificationAsRead(@PathVariable Integer notificationId) {
+        try {
+            Optional<NotificationEntity> notificationOptional = notificationRepository.findById(notificationId);
+            if (notificationOptional.isPresent()) {
+                NotificationEntity notification = notificationOptional.get();
+                notification.setStatus("Read");
+                notificationRepository.save(notification);
+                return ResponseEntity.ok("알림이 읽음으로 표시되었습니다.");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 알림을 찾을 수 없습니다.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("알림 상태 업데이트 중 오류 발생");
+        }
+    }
 }

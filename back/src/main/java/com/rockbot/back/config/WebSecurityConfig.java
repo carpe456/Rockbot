@@ -51,7 +51,7 @@ public class WebSecurityConfig {
                                                 .hasRole("ADMIN")
                                                 .requestMatchers("/api/v1/user/**").hasAnyRole("USER", "ADMIN")
                                                 .requestMatchers("/", "/api/v1/auth/**", "/api/v1/auth/travel-requests",
-                                                                "/oauth2/**")
+                                                                "/oauth2/**", "/api/v1/auth/notifications")
                                                 .permitAll()
                                                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())

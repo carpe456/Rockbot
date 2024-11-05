@@ -13,6 +13,7 @@ interface User {
 
 interface TravelRequest {
     requestId: number;
+    userId: string;
     name: string;
     departmentId: number;
     destination: string;
@@ -120,63 +121,78 @@ const AdminPage: React.FC = () => {
         fetchUsers();
     }, [cookies.accessToken]);
 
-    const handleApprove = async (id: number) => {
+    const sendNotification = async (userId: string, message: string) => {
+        console.log("Sending notification to userId:", userId, "with message:", message); // 확인용 로그
         try {
-            await axios.put(
-                `http://localhost:4040/api/v1/auth/travel-requests/${id}/status`,
-                { status: 'Approved' },
+            await axios.post(
+                'http://localhost:4040/api/v1/auth/notifications',
+                { userId, message, status: 'Unread' },
                 {
                     headers: {
                         Authorization: `Bearer ${cookies.accessToken}`,
                     },
                 }
             );
-
-            // fade-out 클래스를 추가하고 3초 후 항목 삭제
-            setTravelRequests((prevRequests) =>
-                prevRequests.map((request) =>
-                    request.requestId === id ? { ...request, status: 'Approved', fadingOut: true } : request
-                )
-            );
-
-            setTimeout(() => {
-                setTravelRequests((prevRequests) =>
-                    prevRequests.filter((request) => request.requestId !== id)
-                );
-            }, 3000);
         } catch (error) {
-            console.error('출장 요청 승인 중 오류 발생:', error);
+            console.error('알림 전송 중 오류 발생:', error);
         }
     };
 
-    const handleReject = async (id: number) => {
-        try {
-            await axios.put(
-                `http://localhost:4040/api/v1/auth/travel-requests/${id}/status`,
-                { status: 'Rejected' },
-                {
-                    headers: {
-                        Authorization: `Bearer ${cookies.accessToken}`,
-                    },
-                }
-            );
+// 출장 요청 승인 함수 수정
+const handleApprove = async (id: number, userId: string, submissionDate: string, destination: string) => {
+    try {
+        await axios.put(
+            `http://localhost:4040/api/v1/auth/travel-requests/${id}/status`,
+            { status: 'Approved' },
+            {
+                headers: {
+                    Authorization: `Bearer ${cookies.accessToken}`,
+                },
+            }
+        );
 
-            // fade-out 클래스를 추가하고 3초 후 항목 삭제
-            setTravelRequests((prevRequests) =>
-                prevRequests.map((request) =>
-                    request.requestId === id ? { ...request, status: 'Rejected', fadingOut: true } : request
-                )
-            );
+        // 승인 후 알림 전송
+        await sendNotification(userId, `${formatDate(submissionDate)} 신청한 ${destination} 출장 요청이 승인되었습니다.`);
 
-            setTimeout(() => {
-                setTravelRequests((prevRequests) =>
-                    prevRequests.filter((request) => request.requestId !== id)
-                );
-            }, 3000);
-        } catch (error) {
-            console.error('출장 요청 거절 중 오류 발생:', error);
-        }
-    };
+        // 승인된 요청을 UI에서 승인 상태로 업데이트
+        setTravelRequests((prevRequests) =>
+            prevRequests.map((request) =>
+                request.requestId === id ? { ...request, status: 'Approved' } : request
+            )
+        );
+
+    } catch (error) {
+        console.error('출장 요청 승인 중 오류 발생:', error);
+    }
+};
+
+// 출장 요청 거절 함수 수정
+const handleReject = async (id: number, userId: string, submissionDate: string, destination: string) => {
+    try {
+        await axios.put(
+            `http://localhost:4040/api/v1/auth/travel-requests/${id}/status`,
+            { status: 'Rejected' },
+            {
+                headers: {
+                    Authorization: `Bearer ${cookies.accessToken}`,
+                },
+            }
+        );
+
+        // 거절 후 알림 전송
+        await sendNotification(userId, `${formatDate(submissionDate)} 신청한 ${destination} 출장 요청이 거절되었습니다.`);
+
+        // 거절된 요청을 UI에서 거절 상태로 업데이트
+        setTravelRequests((prevRequests) =>
+            prevRequests.map((request) =>
+                request.requestId === id ? { ...request, status: 'Rejected' } : request
+            )
+        );
+
+    } catch (error) {
+        console.error('출장 요청 거절 중 오류 발생:', error);
+    }
+};
 
     const handleLogout = () => {
         removeCookie('name', { path: '/' });
@@ -188,17 +204,17 @@ const AdminPage: React.FC = () => {
     const handleDepartmentChange = async (userId: string, newDepartmentId: number) => {
         try {
             const token = cookies.accessToken;
-    
+
             console.log("User ID:", userId);
             console.log("New Department ID:", newDepartmentId);
-    
+
             if (!token) {
                 alert("로그인이 필요합니다.");
                 return;
             }
-    
+
             console.log("Sending request with User ID:", userId, "and Department ID:", newDepartmentId);
-    
+
             // 백엔드 서버로 PUT 요청을 보내 부서 ID를 변경
             await axios.put(
                 `http://localhost:4040/api/v1/auth/${userId}/department`, // 여기에 userId를 포함합니다
@@ -209,7 +225,7 @@ const AdminPage: React.FC = () => {
                     },
                 }
             );
-    
+
             // 부서 변경 후 프론트엔드 상태 업데이트
             setUsers((prevUsers) =>
                 prevUsers.map((user) =>
@@ -221,7 +237,7 @@ const AdminPage: React.FC = () => {
             console.error("부서 변경 중 오류 발생:", error);
             alert("부서 변경에 실패했습니다.");
         }
-    };    
+    };
 
     const toggleDarkMode = () => {
         setDarkMode(!darkMode);
@@ -284,13 +300,19 @@ const AdminPage: React.FC = () => {
                                 <p className="trip-submission-date">신청 날짜 : {formatDate(request.submissionDate)}</p>
                             </div>
                             <div className="trip-actions">
-                                <button className="approve-button" onClick={() => handleApprove(request.requestId)}>
-                                    ✔ 승인
-                                </button>
-                                <button className="reject-button" onClick={() => handleReject(request.requestId)}>
-                                    ✖ 거절
-                                </button>
+                            <button 
+    className="approve-button" 
+    onClick={() => handleApprove(request.requestId, request.userId, request.submissionDate, request.destination)}>
+    ✔ 승인
+</button>
+<button 
+    className="reject-button" 
+    onClick={() => handleReject(request.requestId, request.userId, request.submissionDate, request.destination)}>
+    ✖ 거절
+</button>
+
                             </div>
+
                         </div>
                     ))}
                 </div>
@@ -354,26 +376,26 @@ const AdminPage: React.FC = () => {
 
             {selectedMenu === 'users' && (
                 <div className="user-list-container">
-                     {users
-            .filter((user) => user.userId !== 'Admin') // 관리자 계정 제외
-            .map((user) =>  (
-                        <div key={user.userId} className="user-info">
-                            <p>이름 : {user.name}</p>
-                            <p>부서 : {getDepartmentName(user.departmentId)}</p>
-                            <label>
-                                부서 변경</label>
-                            <select
-                                className="custom-select"
-                                value={user.departmentId}
-                                onChange={(e) => handleDepartmentChange(user.userId, parseInt(e.target.value))}
-                            >
-                                <option value={1}>임시부서</option>
-                                <option value={2}>인사부서</option>
-                                <option value={3}>편성부서</option>
-                                <option value={4}>제작부서</option>
-                            </select>
-                        </div>
-                    ))}
+                    {users
+                        .filter((user) => user.userId !== 'Admin') // 관리자 계정 제외
+                        .map((user) => (
+                            <div key={user.userId} className="user-info">
+                                <p>이름 : {user.name}</p>
+                                <p>부서 : {getDepartmentName(user.departmentId)}</p>
+                                <label>
+                                    부서 변경</label>
+                                <select
+                                    className="custom-select"
+                                    value={user.departmentId}
+                                    onChange={(e) => handleDepartmentChange(user.userId, parseInt(e.target.value))}
+                                >
+                                    <option value={1}>임시부서</option>
+                                    <option value={2}>인사부서</option>
+                                    <option value={3}>편성부서</option>
+                                    <option value={4}>제작부서</option>
+                                </select>
+                            </div>
+                        ))}
                 </div>
             )}
         </div>
