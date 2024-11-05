@@ -178,19 +178,22 @@ const ChatBot: React.FC = () => {
       const storedUserInfo = localStorage.getItem('userInfo');
       let userId = 'unknown_user';
       let departmentId = 1;
+      let name = profileInfo.name || 'unknown_name';
+
       if (cookies.name) {
-        userId = cookies.name;
+        name = cookies.name;
       } else if (storedUserInfo) {
         const parsedInfo = JSON.parse(storedUserInfo);
         userId = parsedInfo.userId || 'unknown_user';
         departmentId = parsedInfo.departmentId || 1;
+        name = parsedInfo.name
       }
 
-      console.log('Sending request to server:', { user_id: userId, question });
+      console.log('Sending request to server:', { user_id: userId, question, department_id: departmentId, name : name });
 
       const response = await axios.post(
         'http://localhost:5000/ask',
-        { user_id: userId, question, department_id: departmentId },
+        { user_id: userId, question, department_id: departmentId, name: name },
         { headers: { 'Content-Type': 'application/json' } }
       );
 
