@@ -405,7 +405,18 @@ const ChatBot: React.FC = () => {
               </div>
             </div>
           ))}
+
+          {/* 챗봇 응답 로딩 상태 표시 */}
+          {isLoading && (
+            <div className="message-container bot-message">
+              <div className="loading-spinner">
+                <div className="spinner"></div>
+                <span className="loading-text">답변을 작성하고 있어요! 잠시만 기다려주세요</span>
+              </div>
+            </div>
+          )}
         </div>
+        
         <div className="chat-input-container">
           <div className="input-group">
             <input
