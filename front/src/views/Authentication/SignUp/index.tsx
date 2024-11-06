@@ -8,6 +8,7 @@ import { ResponseCode } from 'types/enums';
 import { useNavigate } from 'react-router-dom';
 import { ResponseBody } from 'types';
 import { on } from 'events';
+import bgImage from './bg.jpg';
 
 export default function SignUp() {
 
