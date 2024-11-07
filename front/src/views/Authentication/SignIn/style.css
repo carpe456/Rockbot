@@ -32,15 +32,6 @@
     gap: 24px;
 }
 
-/* .sign-in-title {
-    display: flex;
-    justify-content: center;
-    font-size: 30px;
-    line-height: 173%;
-    text-align: center;
-    background-image: url('');
-} */
-
 .sign-in-content-box {
     display: flex;
     flex-direction: column;
@@ -95,4 +86,20 @@
 
 .input-box-input {
     font-size: 15px;
+}
+
+@media (max-width: 768px) { /* 모바일 화면 크기 조정 */
+    .sign-in-image {
+        display: none; /* 모바일에서 이미지 숨김 */
+      }
+    
+      .sign-in-container {
+        width: 100vw;
+        min-width: 0; /* 모바일에서 min-width 제거 */
+    }
+    
+    .sign-in-box {
+        width: 85%; /* 모바일에서 너비 줄이기 */
+        gap: 30px;
+    }
 }

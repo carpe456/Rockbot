@@ -411,7 +411,7 @@ const ChatBot: React.FC = () => {
             <div className="message-container bot-message">
               <div className="loading-spinner">
                 <div className="spinner"></div>
-                <span className="loading-text">답변을 작성하고 있어요! 잠시만 기다려주세요</span>
+                <span className="loading-text">답변을 작성하고 있어요!<br/>잠시만 기다려주세요</span>
               </div>
             </div>
           )}

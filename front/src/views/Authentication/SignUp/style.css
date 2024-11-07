@@ -86,3 +86,22 @@
 .input-box-input {
     font-size: 15px;
 }
+
+@media (max-width: 768px) { /* 모바일 화면 크기 조정 */
+    .sign-up-image {
+        display: none; /* 모바일에서 이미지 숨김 */
+      }
+    
+      .sign-up-container {
+        min-width: 0; /* 모바일에서 min-width 제거 */
+    }
+    
+    .sign-up-box {
+        width: 85%; /* 모바일에서 너비 줄이기 */
+        gap: 30px;
+    }
+
+    .input-box-body {
+        gap: 0;
+    }
+}
