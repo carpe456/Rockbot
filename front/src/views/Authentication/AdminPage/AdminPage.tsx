@@ -204,34 +204,41 @@ const handleReject = async (id: number, userId: string, submissionDate: string, 
     const handleDepartmentChange = async (userId: string, newDepartmentId: number) => {
         try {
             const token = cookies.accessToken;
-
+    
             console.log("User ID:", userId);
             console.log("New Department ID:", newDepartmentId);
-
+    
             if (!token) {
                 alert("로그인이 필요합니다.");
                 return;
             }
-
+    
+            // 부서 이름을 가져오기
+            const departmentName = getDepartmentName(newDepartmentId);
+    
             console.log("Sending request with User ID:", userId, "and Department ID:", newDepartmentId);
-
+    
             // 백엔드 서버로 PUT 요청을 보내 부서 ID를 변경
             await axios.put(
-                `http://localhost:4040/api/v1/auth/${userId}/department`, // 여기에 userId를 포함합니다
+                `http://localhost:4040/api/v1/auth/${userId}/department`,
                 { departmentId: newDepartmentId },
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`, // 인증 토큰을 포함합니다
+                        Authorization: `Bearer ${token}`,
                     },
                 }
             );
-
+    
             // 부서 변경 후 프론트엔드 상태 업데이트
             setUsers((prevUsers) =>
                 prevUsers.map((user) =>
                     user.userId === userId ? { ...user, departmentId: newDepartmentId } : user
                 )
             );
+    
+            // 부서 변경 후 알림 전송
+            await sendNotification(userId, `부서가 ${departmentName}로 변경되었습니다.`);
+    
             alert("부서가 성공적으로 변경되었습니다.");
         } catch (error) {
             console.error("부서 변경 중 오류 발생:", error);

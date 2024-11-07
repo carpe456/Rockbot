@@ -385,6 +385,20 @@ html {
   margin-left: 9px;
 }
 
+.message-container.bot-message {
+  display: flex;
+  align-items: center; /* 세로 가운데 정렬 */
+  margin-bottom: 12px;
+}
+
+.profile-image {
+  width: 40px; /* 이미지 크기 설정 */
+  height: 40px;
+  margin-right: 10px; /* 말풍선과 이미지 사이 간격 설정 */
+  border-radius: 50%; /* 원형 이미지 */
+  object-fit: cover;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);

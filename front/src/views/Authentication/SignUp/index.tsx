@@ -289,15 +289,6 @@ export default function SignUp() {
             <div className='sign-up-image'></div>
             <div className='sign-up-container'>
                 <div className='sign-up-box'>
-                    <div className='sign-up-content-box'>
-                        <div className='sign-up-content-sns-sign-up-box'>
-                            <div className='sign-up-content-sns-sign-up-title'>{'SNS 회원가입'}</div>
-                            <div className='sign-up-content-sns-sign-up-button-box'>
-                            <div className='kakao-sign-in-button' onClick={() => onSnsSignInButtonClickHandler('kakao')}></div>
-                            <div className='naver-sign-in-button'  onClick={() => onSnsSignInButtonClickHandler('naver')}></div>
-                            </div>
-                        </div>
-                    </div>
                     <div className='sign-up-content-divider'></div>
                     <div className='sign-up-content-input-box'>
                         {/* 아이디 */}

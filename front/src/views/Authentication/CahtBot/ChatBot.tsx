@@ -390,11 +390,20 @@ const ChatBot: React.FC = () => {
         {showProfileSettings && <div className="profile-settings-container"></div>}
 
         <div className="chat-messages-container" ref={chatContainerRef}>
-          {chatHistory.map((chat, index) => (
-            <div
-              key={index}
-              className={`message-container ${chat.sender === 'user' ? 'user-message' : 'bot-message'}`}
-            >
+  {chatHistory.map((chat, index) => (
+    <div
+      key={index}
+      className={`message-container ${chat.sender === 'user' ? 'user-message' : 'bot-message'}`}
+    >
+      {/* 챗봇 메시지에만 프로필 이미지 추가 */}
+      {chat.sender === 'bot' && (
+        <img
+          src="/robot.png"
+          alt="Bot profile"
+          className="profile-image"
+        />
+      )}
+              
               <div className={`message-bubble ${chat.sender === 'user' ? 'user-bubble' : 'bot-bubble'}`}>
                 {chat.message.split("\n").map((line, index) => (
                   <span key={index}>
