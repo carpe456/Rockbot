@@ -265,19 +265,19 @@ const handleReject = async (id: number, userId: string, submissionDate: string, 
                         className={`menu-item ${selectedMenu === 'travelPending' ? 'active' : ''}`}
                         onClick={() => setSelectedMenu('travelPending')}
                     >
-                        출장 결재 대기
+                        결재 대기
                     </button>
                     <button
                         className={`menu-item ${selectedMenu === 'travelRequests' ? 'active' : ''}`}
                         onClick={() => setSelectedMenu('travelRequests')}
                     >
-                        출장 결재 목록
+                        결재 목록
                     </button>
                     <button
                         className={`menu-item ${selectedMenu === 'users' ? 'active' : ''}`}
                         onClick={() => setSelectedMenu('users')}
                     >
-                        회원 목록
+                        직원 목록
                     </button>
                 </div>
 

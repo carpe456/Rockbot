@@ -372,6 +372,12 @@ input[type='number']:focus {
   padding: 40px; /* 컨테이너 패딩 조정 */
 }
 
+.trip-item:last-child,
+.trip-request:last-child,
+.trip-info:last-child {
+  margin-bottom: 0;
+}
+
 @media (max-width: 768px) { /* 모바일 화면 크기 조정 */
   body,
   html {
