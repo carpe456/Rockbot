@@ -365,9 +365,11 @@ html {
 
 .loading-spinner {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 10px 0;
+  width: 100%;
+  margin-top: 20px; /* 필요에 따라 조정 */
 }
 
 .spinner {
@@ -379,6 +381,7 @@ html {
   width: 24px;
   height: 24px;
   animation: spin 1s linear infinite;
+  margin-bottom: 10px;
 }
 
 .loading-text {
